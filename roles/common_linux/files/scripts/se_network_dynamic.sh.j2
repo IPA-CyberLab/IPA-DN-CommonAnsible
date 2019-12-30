@@ -1,0 +1,28 @@
+#!/bin/bash
+
+## IPv4
+
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -P FORWARD ACCEPT
+
+iptables -F
+iptables -A INPUT -p tcp -m tcpmss --mss 1:500 -j DROP
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A FORWARD -i lo -j ACCEPT
+
+## IPv6
+
+ip6tables -P INPUT ACCEPT
+ip6tables -P OUTPUT ACCEPT
+ip6tables -P FORWARD ACCEPT
+
+ip6tables -F
+ip6tables -A INPUT -p tcp -m tcpmss --mss 1:500 -j DROP
+ip6tables -A INPUT -i lo -j ACCEPT
+ip6tables -A FORWARD -i lo -j ACCEPT
+
+
+{{ (network_iptables_rules | default()) }}
+
+

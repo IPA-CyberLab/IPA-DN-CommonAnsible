@@ -1,0 +1,16 @@
+#!/bin/bash
+
+wait_for_network_system_init3
+
+# Start the VLAN driver
+modprobe 8021q
+
+# -- begin network_boottime_1 --
+
+{{ (network_boottime_1 | default()) }}
+
+# -- end network_boottime_1 --
+
+
+
+

@@ -1,0 +1,31 @@
+- name: reboot - reboot the host
+  shell: sync && sync && sync && sleep 2 && reboot --force
+  async: 1
+  poll: 0
+  ignore_errors: true
+  when: true
+
+- name: reboot - wait for host down
+  wait_for:
+    host: "{{ common_ssh_host }}"
+    port: "{{ common_ssh_port }}"
+    timeout: 300
+    connect_timeout: 1
+    delay: 1
+    state: stopped
+  delegate_to: localhost
+  become: false
+  when: true
+
+- name: reboot - wait for host up
+  wait_for:
+    host: "{{ running_ssh_host }}"
+    port: "{{ common_ssh_port }}"
+    timeout: 300
+    connect_timeout: 1
+    delay: 1
+    search_regex: SSH
+    state: started
+  delegate_to: localhost
+  become: false
+  when: true

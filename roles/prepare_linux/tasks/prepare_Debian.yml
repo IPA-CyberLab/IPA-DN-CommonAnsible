@@ -1,0 +1,197 @@
+- name: uninstall unattended-upgrades
+  apt:
+    pkg:
+      - unattended-upgrades
+    state: absent
+
+- name: Disable apt-daily.timer
+  systemd:
+    name: apt-daily.timer
+    state: stopped
+    enabled: false
+
+- name: Disable apt-daily.service
+  systemd:
+    name: apt-daily.service
+    state: stopped
+    enabled: false
+
+- name: update apt sources.list
+  shell:
+    cmd: |
+      set -eu
+      cp -n /etc/apt/sources.list /etc/apt/sources.list.original.4
+      cat <<\EOF_APT > /etc/apt/sources.list
+      deb http://jp.archive.ubuntu.com/ubuntu bionic main restricted
+      deb http://jp.archive.ubuntu.com/ubuntu bionic-updates main restricted
+      deb http://jp.archive.ubuntu.com/ubuntu bionic universe
+      deb http://jp.archive.ubuntu.com/ubuntu bionic-updates universe
+      deb http://jp.archive.ubuntu.com/ubuntu bionic multiverse
+      deb http://jp.archive.ubuntu.com/ubuntu bionic-updates multiverse
+      deb http://jp.archive.ubuntu.com/ubuntu bionic-backports main restricted universe multiverse
+      deb http://jp.archive.ubuntu.com/ubuntu bionic-security main restricted
+      deb http://jp.archive.ubuntu.com/ubuntu bionic-security universe
+      deb http://jp.archive.ubuntu.com/ubuntu bionic-security multiverse
+      EOF_APT
+      apt-get -y update
+    executable: /bin/bash
+
+- name: install ifupdown
+  apt:
+    pkg:
+      - ifupdown
+    update_cache: false
+  when: true
+
+- name: Add parameter to the grub
+  lineinfile:
+    dest: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX="(?!.* {{ item.regex }})(.*)"'
+    line: 'GRUB_CMDLINE_LINUX="\1 {{ item.context }}"'
+    state: present
+    backup: true
+    backrefs: true
+  with_items:
+    - { regex: 'net.ifnames=', context: 'net.ifnames=0' }
+    - { regex: 'biosdevname=', context: 'biosdevname=0' }
+    - { regex: 'consoleblank=', context: 'consoleblank=0' }
+    - { regex: 'ixgbe.allow_unsupported_sfp=', context: 'ixgbe.allow_unsupported_sfp=1' }
+    - { regex: 'netcfg/do_not_use_netplan=', context: 'netcfg/do_not_use_netplan=true' }
+  register: edit_grub_config
+
+- name: Update grub
+  command: "update-grub2"
+  when: edit_grub_config.changed
+  register: update_grub
+
+- name: disable netplan
+  file:
+    path: /etc/netplan/01-netcfg.yaml
+    state: absent
+
+
+- name: Configure sshd_config
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: '^#*{{ item.target }}.*$'
+    line: '{{ item.target }} {{ item.new }}'
+    state: present
+    backup: true
+    backrefs: false
+  with_items:
+    - { target: 'PasswordAuthentication', new: 'no' }
+    - { target: 'PubkeyAuthentication', new: 'yes' }
+    - { target: 'PermitRootLogin', new: 'no' }
+    - { target: 'PermitEmptyPasswords', new: 'no' }
+    - { target: 'UseDNS', new: 'no' }
+    - { target: 'MaxSessions', new: '128' }
+
+- name: Backup original /etc/systemd/resolved.conf file
+  copy:
+    remote_src: true
+    src: /etc/systemd/resolved.conf
+    dest: /etc/systemd/resolved.conf.original
+    force: false
+
+- name: Stop and disable the systemd-resolved service
+  systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: false
+  register: stop_disable_resolved
+
+- name: Delete systemd-resolved resolv.conf file
+  file:
+    path: /etc/resolv.conf
+    state: absent
+  when: stop_disable_resolved.changed
+
+- name: Save default resolv.conf
+  copy:
+    dest: /etc/resolv.conf
+    content: |
+      nameserver 8.8.8.8
+      nameserver 8.8.4.4
+
+- name: add user '{{ common_admin_user_name }}'
+  user:
+    name: "{{ common_admin_user_name }}"
+    comment: "{{ common_admin_user_comment }}"
+    password: "{{ common_admin_hashed_password }}"
+    groups: sudo
+    append: true
+    update_password: on_create
+    shell: /bin/bash
+    create_home: true
+
+- name: add SSH public key for user '{{ common_admin_user_name }}'
+  authorized_key:
+    user: "{{ common_admin_user_name }}"
+    key: "{{ common_admin_ssh_public_key }}"
+    manage_dir: true
+    exclusive: false
+
+- name: add user '{{ my_user_name }}' for daily administration tasks
+  user:
+    name: "{{ my_user_name }}"
+    comment: "{{ my_user_comment }}"
+    password: "{{ my_user_password | password_hash('sha512') }}"
+    groups: sudo
+    append: true
+    update_password: on_create
+    shell: /bin/bash
+    create_home: true
+
+- name: add SSH public key for user '{{ my_user_name }}'
+  authorized_key:
+    user: "{{ my_user_name }}"
+    key: "{{ my_user_ssh_public_key }}"
+    manage_dir: true
+    exclusive: false
+
+- name: set user '{{ my_user_name }}' as an no-password sudoer
+  shell:
+    cmd: |
+      set -eu
+      echo "{{ my_user_name }} ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+      echo >> /etc/sudoers
+      echo "Defaults    env_keep+=SSH_AUTH_SOCK" >> /etc/sudoers
+    executable: /bin/bash
+  changed_when: false
+
+- name: put .hushlogin
+  shell:
+    cmd: |
+      touch /home/{{ my_user_name }}/.hushlogin
+    executable: /bin/bash
+  changed_when: false
+
+- name: upload 00-network.rules
+  copy:
+    dest: /etc/udev/rules.d/00-network.rules
+    content: "{{ eth_settings }}"
+
+- name: upload /etc/network/interfaces
+  copy:
+    dest: /etc/network/interfaces
+    content: "{{ ip_settings_prepare_tmp }}"
+    backup: true
+
+- name: set hostname
+  hostname:
+    name: "{{ common_autogenerated_host_fqdn }}"
+
+- name: apt safe-upgrade
+  apt:
+    upgrade: yes
+    cache_valid_time: 3600
+
+- name: regenerate SSH keys
+  shell: "{{ item }}"
+  with_items:
+  - /bin/rm -v /etc/ssh/ssh_host_* || true
+  - dpkg-reconfigure -f noninteractive openssh-server
+
+- name: triggerreboot
+  command: /bin/true
+  notify: prepare_reboot_host

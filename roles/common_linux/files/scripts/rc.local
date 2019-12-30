@@ -1,0 +1,6 @@
+#!/bin/bash
+
+touch /var/lock/subsys/local
+
+/etc/se_boot_all.sh
+

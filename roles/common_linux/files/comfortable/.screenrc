@@ -1,0 +1,11 @@
+defutf8 on
+defencoding utf8
+encoding utf8 utf8
+startup_message off
+vbell off
+defscrollback 10000
+termcapinfo xterm 'is=\E[r\E[m\E[2J\E[H\E[?7h\E[?1;4;6l'
+altscreen on
+defbce on
+term xterm-256color
+hardstatus alwayslastline "%{= wg} %-w%{=bu dr}%n %t%{-}%+w %= %{=b kw} %Y/%m/%d %0c"

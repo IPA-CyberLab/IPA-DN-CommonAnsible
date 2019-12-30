@@ -1,0 +1,2 @@
+- name: common_reboot_host
+  include_tasks: "../IPA-DN-CommonAnsible/roles/common_linux/handlers/reboot_{{ ansible_os_family }}.yml"
