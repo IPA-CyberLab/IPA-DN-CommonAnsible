@@ -85,7 +85,7 @@
     backup: true
     backrefs: false
   with_items:
-    - { target: 'PasswordAuthentication', new: 'no' }
+    - { target: 'PasswordAuthentication', new: "{{ 'yes' if (prepare_allow_ssh_password_auth | default()) else 'no' }}" }
     - { target: 'PubkeyAuthentication', new: 'yes' }
     - { target: 'PermitRootLogin', new: 'no' }
     - { target: 'PermitEmptyPasswords', new: 'no' }

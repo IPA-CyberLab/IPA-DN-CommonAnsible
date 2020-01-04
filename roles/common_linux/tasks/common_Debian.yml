@@ -40,6 +40,14 @@
     force: yes
   when: (not (do_not_delete_user1 | default()))
 
+- name: delete user ubuntu if remains
+  user:
+    name: ubuntu
+    state: absent
+    remove: yes
+    force: yes
+  when: (delete_user_ubuntu | default())
+
 - name: apt change source servers to Japan 1
   replace:
     dest: /etc/apt/sources.list
