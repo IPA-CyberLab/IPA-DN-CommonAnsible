@@ -4,11 +4,11 @@
   changed_when: false
 
 - name: reboot - reboot the host
-  shell: sync && sync && sync && sleep 2 && reboot --force
-  async: 1
-  poll: 0
+  shell:
+    cmd: |
+      /usr/bin/nohup /usr/bin/bash -c "sync; sleep 3; /sbin/reboot --force; /sbin/reboot" &
+    executable: /bin/bash
   ignore_errors: true
-  when: (not (no_reboot | default()))
 
 - name: reboot - wait for host down
   wait_for:

@@ -2,6 +2,7 @@
   apt:
     pkg:
       - unattended-upgrades
+      - cloud-init
     state: absent
 
 - name: Disable apt-daily.timer
@@ -22,16 +23,16 @@
       set -eu
       cp -n /etc/apt/sources.list /etc/apt/sources.list.original.4
       cat <<\EOF_APT > /etc/apt/sources.list
-      deb http://jp.archive.ubuntu.com/ubuntu bionic main restricted
-      deb http://jp.archive.ubuntu.com/ubuntu bionic-updates main restricted
-      deb http://jp.archive.ubuntu.com/ubuntu bionic universe
-      deb http://jp.archive.ubuntu.com/ubuntu bionic-updates universe
-      deb http://jp.archive.ubuntu.com/ubuntu bionic multiverse
-      deb http://jp.archive.ubuntu.com/ubuntu bionic-updates multiverse
-      deb http://jp.archive.ubuntu.com/ubuntu bionic-backports main restricted universe multiverse
-      deb http://jp.archive.ubuntu.com/ubuntu bionic-security main restricted
-      deb http://jp.archive.ubuntu.com/ubuntu bionic-security universe
-      deb http://jp.archive.ubuntu.com/ubuntu bionic-security multiverse
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }} main restricted
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }}-updates main restricted
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }} universe
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }}-updates universe
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }} multiverse
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }}-updates multiverse
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }}-backports main restricted universe multiverse
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }}-security main restricted
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }}-security universe
+      deb {{ host_apt_sources_base_url | default("http://jp.archive.ubuntu.com/ubuntu") }} {{ ansible_distribution_release }}-security multiverse
       EOF_APT
       apt-get -y update
     executable: /bin/bash
@@ -58,17 +59,22 @@
     - { regex: 'ixgbe.allow_unsupported_sfp=', context: 'ixgbe.allow_unsupported_sfp=1' }
     - { regex: 'netcfg/do_not_use_netplan=', context: 'netcfg/do_not_use_netplan=true' }
   register: edit_grub_config
+  when: (prepare_skip_add_grub_params | default(false)) == false
 
 - name: Update grub
   command: "update-grub2"
   when: edit_grub_config.changed
   register: update_grub
 
-- name: disable netplan
+- name: disable netplan 1
   file:
     path: /etc/netplan/01-netcfg.yaml
     state: absent
 
+- name: disable netplan 2
+  file:
+    path: /etc/netplan/50-cloud-init.yaml
+    state: absent
 
 - name: Configure sshd_config
   lineinfile:
@@ -123,6 +129,7 @@
     update_password: on_create
     shell: /bin/bash
     create_home: true
+  when: (not (do_not_add_admin_user | default()))
 
 - name: add SSH public key for user '{{ common_admin_user_name }}'
   authorized_key:
@@ -130,6 +137,7 @@
     key: "{{ common_admin_ssh_public_key }}"
     manage_dir: true
     exclusive: false
+  when: (not (do_not_add_admin_user | default()))
 
 - name: add user '{{ my_user_name }}' for daily administration tasks
   user:
@@ -141,6 +149,7 @@
     update_password: on_create
     shell: /bin/bash
     create_home: true
+  when: (not (do_not_add_admin_user | default()))
 
 - name: add SSH public key for user '{{ my_user_name }}'
   authorized_key:
@@ -148,6 +157,7 @@
     key: "{{ my_user_ssh_public_key }}"
     manage_dir: true
     exclusive: false
+  when: (not (do_not_add_admin_user | default()))
 
 - name: set user '{{ my_user_name }}' as an no-password sudoer
   shell:
@@ -158,6 +168,7 @@
       echo "Defaults    env_keep+=SSH_AUTH_SOCK" >> /etc/sudoers
     executable: /bin/bash
   changed_when: false
+  when: (not (do_not_add_admin_user | default()))
 
 - name: put .hushlogin
   shell:
@@ -165,6 +176,7 @@
       touch /home/{{ my_user_name }}/.hushlogin
     executable: /bin/bash
   changed_when: false
+  when: (not (do_not_add_admin_user | default()))
 
 - name: upload 00-network.rules
   copy:
