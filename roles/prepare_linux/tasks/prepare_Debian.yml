@@ -170,6 +170,44 @@
   changed_when: false
   when: (not (do_not_add_admin_user | default()))
 
+- name: set subgid and subgid for root and lxd
+  shell:
+    cmd: |
+      touch /etc/subuid
+      touch /etc/subgid
+      ret=`cat /etc/subuid | grep lxd | wc -l`
+      if [ ${ret} -eq 0 ]; then
+      cat <<\EOF >> /etc/subuid
+      lxd:100000:65536
+      EOF
+      echo __changed__
+      fi
+      ret=`cat /etc/subuid | grep root | wc -l`
+      if [ ${ret} -eq 0 ]; then
+      cat <<\EOF >> /etc/subuid
+      root:100000:65536
+      EOF
+      echo __changed__
+      fi
+      ret=`cat /etc/subgid | grep lxd | wc -l`
+      if [ ${ret} -eq 0 ]; then
+      cat <<\EOF >> /etc/subgid
+      lxd:100000:65536
+      EOF
+      echo __changed__
+      fi
+      ret=`cat /etc/subgid | grep root | wc -l`
+      if [ ${ret} -eq 0 ]; then
+      cat <<\EOF >> /etc/subgid
+      root:100000:65536
+      EOF
+      echo __changed__
+      fi
+    executable: /bin/bash
+  register:
+    set_subgid
+  changed_when: " '__changed__' in set_subgid.stdout "
+
 - name: put .hushlogin
   shell:
     cmd: |
