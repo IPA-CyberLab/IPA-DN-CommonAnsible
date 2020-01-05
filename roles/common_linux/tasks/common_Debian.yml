@@ -1,3 +1,5 @@
+
+
 - name: init ansible_flags directory
   shell: mkdir -p /etc/ansible_flags/ || true
   changed_when: false
@@ -36,6 +38,15 @@
     state: absent
     remove: yes
     force: yes
+  when: (not (do_not_delete_user1 | default()))
+
+- name: delete user ubuntu if remains
+  user:
+    name: ubuntu
+    state: absent
+    remove: yes
+    force: yes
+  when: (delete_user_ubuntu | default())
 
 - name: apt change source servers to Japan 1
   replace:
@@ -59,7 +70,7 @@
   ignore_errors: true
   changed_when: false
 
-- name: apt install 
+- name: apt install (bionic)
   apt:
     pkg:
       - ssh
@@ -135,8 +146,88 @@
       - sysstat
       - dstat
       - apt-transport-https
+      - net-tools
     update_cache: false
-  when: true
+  when: ansible_distribution_release == 'bionic'
+  async: 3600
+  poll: 1
+
+- name: apt install (eoan)
+  apt:
+    pkg:
+      - ssh
+      - iputils-ping
+      - dnsutils
+      - wget
+      - ifupdown
+      - bc
+      - build-essential
+      - cifs-utils
+      - cmake
+      - conntrack
+      - cu
+      - cvs
+      - debconf
+      - dnsutils
+      - ebtables
+      - emacs
+      - ethtool
+      - ftp
+      - g++
+      - gcc
+      - gettext
+      - git
+      - hostapd
+      - ifupdown
+      - irqbalance
+      - jq
+      - less
+      - libncurses5-dev
+      - libreadline-dev
+      - libssl-dev
+      - libtool
+      - libusb-dev
+      - lm-sensors
+      - lynx
+      - nano
+      - ncurses-base
+      - ncurses-bin
+      - ncurses-dev
+      - ntp
+      - openbsd-inetd
+      - openssl
+      - patch
+      - patchutils
+      - psmisc
+      - python
+      - python-urwid
+      - readline-common
+      - ruby
+      - samba-client
+      - samba-common
+      - screen
+      - snmp
+      - snmpd
+      - subversion
+      - sudo
+      - tcpdump
+      - tcsh
+      - telnet
+      - tftp
+      - traceroute
+      - usb-modeswitch
+      - whois
+      - wireless-tools
+      - zlib1g-dev
+      - bridge-utils
+      - syslog-ng-core
+      - aptitude
+      - sysstat
+      - dstat
+      - apt-transport-https
+      - net-tools
+    update_cache: false
+  when: ansible_distribution_release == 'eoan'
   async: 3600
   poll: 1
 
@@ -409,8 +500,8 @@
     - { target: 'net.ipv4.icmp_ratelimit', new: '1' }
     - { target: 'net.ipv6.icmp.ratelimit', new: '1' }
     - { target: 'net.ipv4.icmp_errors_use_inbound_ifaddr', new: '1' }
-    - { target: 'kernel.sem', new: '65536 655360 64 655360' }
-    - { target: 'kernel.msgmni', new: '65536' }
+    - { target: 'kernel.sem', new: '65536 655360 64 32768' }
+    - { target: 'kernel.msgmni', new: '32768' }
     - { target: 'fs.inotify.max_queued_events', new: '1048576' }
     - { target: 'fs.inotify.max_user_instances', new: '1048576' }
     - { target: 'fs.inotify.max_user_watches', new: '1048576' }
