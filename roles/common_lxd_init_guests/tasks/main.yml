@@ -21,7 +21,7 @@
     mode: 0755
     backup: true
   with_items:
-    - ifupdown_0.8.17ubuntu1.1_amd64.deb
+    - ifupdown_0.8.17ubuntu1.1_amd64.deb # for Ubuntu 18.04 AMD64
     - libpython2.7-minimal_2.7.15~rc1-1_amd64.deb
     - libpython2.7-stdlib_2.7.15~rc1-1_amd64.deb
     - libpython-stdlib_2.7.15~rc1-1_amd64.deb
@@ -29,8 +29,19 @@
     - python2.7_2.7.15~rc1-1_amd64.deb
     - python2.7-minimal_2.7.15~rc1-1_amd64.deb
     - python-minimal_2.7.15~rc1-1_amd64.deb
+    - ifupdown_0.8.35ubuntu1_arm64.deb # For Ubuntu 19.10 ARM64
+    - libpython2.7-minimal_2.7.17-1~19.10_arm64.deb
+    - libpython2.7-stdlib_2.7.17-1~19.10_arm64.deb
+    - libpython2-stdlib_2.7.17-1_arm64.deb
+    - libpython-stdlib_2.7.17-1_arm64.deb
+    - python_2.7.17-1_arm64.deb
+    - python2.7_2.7.17-1~19.10_arm64.deb
+    - python2.7-minimal_2.7.17-1~19.10_arm64.deb
+    - python2_2.7.17-1_arm64.deb
+    - python2-minimal_2.7.17-1_arm64.deb
+    - python-minimal_2.7.17-1_arm64.deb
   vars:
-    ansible_flag_check_filename: "lxd-related-files-8" # increment the number when adds files
+    ansible_flag_check_filename: "lxd_related_files_9" # increment the number when adds files
   when:
     ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
 
@@ -38,7 +49,7 @@
 
 - name: touch flags for LXD-related files
   shell: |
-    touch /etc/ansible_flags/lxd-related-files-8 # increment the number when adds files
+    touch /etc/ansible_flags/lxd_related_files_9 # increment the number when adds files
   changed_when: false
 
 - name: configure guest loop

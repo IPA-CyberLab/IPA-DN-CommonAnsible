@@ -130,8 +130,8 @@
       valid users = lxdroot
       {{ additional_smb_config | default() }}
       EOF
-      groupadd lxdroot -g 100000 || true
-      useradd -s /sbin/nologin -g 100000 -u 100000 lxdroot || true
+      groupadd lxdroot -g {{ lxd_root_uid | default("100000") }} || true
+      useradd -s /sbin/nologin -g {{ lxd_root_uid | default("100000") }} -u {{ lxd_root_uid | default("100000") }} lxdroot || true
       printf "{{ lxdroot_user_password }}\n{{ lxdroot_user_password }}\n" | smbpasswd -a lxdroot
       touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
     executable: /bin/bash
