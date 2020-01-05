@@ -1,0 +1,185 @@
+- name: init ansible_flags directory
+  shell: mkdir -p /etc/ansible_flags/ || true
+  changed_when: false
+
+- name: read ansible_flags
+  find:
+    paths: /etc/ansible_flags/
+  register:
+    ansible_flags
+
+#####################
+
+- name: init lxd
+  shell: |
+    set -eu
+    yes no | lxd init
+    lxc profile device remove default root || true
+    lxc profile device remove default eth0 || true
+    lxc network delete lxdbr0 || true
+    touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+  vars:
+    ansible_flag_check_filename: "lxd_inited"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
+- name: check if storage vmdata1 exists
+  shell: |
+    lxc storage show vmdata1 && echo __ok__ || echo __ng__
+  register:
+    vmdata1_exists
+  changed_when: " '__ng__' in vmdata1_exists.stdout "
+
+- name: create storage vmdata1
+  shell: |
+    set -eu
+    {% if (not(lxd_no_check_vmdata1_mountpoint | default(false))) %}
+    mountpoint /vmdata1/
+    rm -fr /vmdata1/lost+found/
+    {% endif %}
+    lxc storage create vmdata1 dir source=/vmdata1/
+    lxc profile device add default root disk path=/ pool=vmdata1
+  when:
+    vmdata1_exists.changed
+
+- name: disable apparmor on default lxd profile
+  shell: |
+    set -eu
+    lxc profile set default raw.lxc "lxc.apparmor.profile=unconfined"
+  changed_when:
+    false
+
+- name: upload vlan subif scripts
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+    backup: true
+  with_items:
+    - { src: 'files/scripts/se_add_vlan_subif.sh', dest: '/bin/se_add_vlan_subif' }
+
+- name: upload se_restart_lxd.sh scripts
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+    backup: true
+  with_items:
+    - { src: 'files/scripts/se_restart_lxd.sh', dest: '/etc/se_restart_lxd.sh' }
+
+- name: disable lxd autostart with systemd
+  shell: |
+    systemctl disable lxd
+    systemctl disable lxd.socket
+  changed_when: false
+
+- name: add restart lxd to cron
+  cron:
+    name: "restart lxd midnight"
+    minute: 10
+    hour: 4
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: /etc/se_restart_lxd.sh
+    backup: yes
+
+- name: install samba server
+  apt:
+    pkg:
+      - samba
+      - samba-common
+    update_cache: true
+    cache_valid_time: 3600
+  when: true
+
+- name: configure samba server for lxd
+  shell:
+    cmd: |
+      set -eu
+      cat <<\EOF > /etc/samba/smb.conf
+      [global]
+      workgroup = WORKGROUP
+      max log size = 5000
+      security = user
+      passdb backend = tdbsam
+      load printers = no
+      socket options = TCP_NODELAY
+      [vmdata1]
+      comment = vmdata1
+      path = /vmdata1/
+      public = yes
+      writable = yes
+      read only = no
+      printable = no
+      browseable = yes
+      guest ok = no
+      guest only = no
+      directory mask = 0777
+      create mask = 0777
+      valid users = lxdroot
+      {{ additional_smb_config | default() }}
+      EOF
+      groupadd lxdroot -g 100000 || true
+      useradd -s /sbin/nologin -g 100000 -u 100000 lxdroot || true
+      printf "{{ lxdroot_user_password }}\n{{ lxdroot_user_password }}\n" | smbpasswd -a lxdroot
+      touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+    executable: /bin/bash
+  vars:
+    ansible_flag_check_filename: "lxd_samba_inited"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
+
+- name: enable smbd for lxd
+  systemd:
+    name: smbd
+    state: started
+    enabled: true
+
+
+
+# Prepare static LXD images from the ossvalue server
+- name: prepare the lxd image - bionic.20180617.amd64.local
+  shell:
+    cmd: |
+      set -eu
+      mkdir -p /root/lxd-images/bionic.20180617.amd64.local/
+      cd /root/lxd-images/bionic.20180617.amd64.local/
+      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/19110501_ubuntu_1804_bionic_cloud_images/release-20180617/bionic/release-20180617/ubuntu-18.04-server-cloudimg-amd64-lxd.tar.xz
+      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/19110501_ubuntu_1804_bionic_cloud_images/release-20180617/bionic/release-20180617/ubuntu-18.04-server-cloudimg-amd64.squashfs
+      lxc image import ubuntu-18.04-server-cloudimg-amd64-lxd.tar.xz ubuntu-18.04-server-cloudimg-amd64.squashfs --alias bionic.20180617.amd64.local
+      touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+    executable: /bin/bash
+  vars:
+    ansible_flag_check_filename: "prepare.bionic.20180617.amd64.local"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
+
+
+- name: prepare the lxd image - bionic.20180617.arm64.local
+  shell:
+    cmd: |
+      set -eu
+      mkdir -p /root/lxd-images/bionic.20180617.arm64.local/
+      cd /root/lxd-images/bionic.20180617.arm64.local/
+      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/19110501_ubuntu_1804_bionic_cloud_images/release-20180617/bionic/release-20180617/ubuntu-18.04-server-cloudimg-arm64-lxd.tar.xz
+      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/19110501_ubuntu_1804_bionic_cloud_images/release-20180617/bionic/release-20180617/ubuntu-18.04-server-cloudimg-arm64.squashfs
+      lxc image import ubuntu-18.04-server-cloudimg-arm64-lxd.tar.xz ubuntu-18.04-server-cloudimg-arm64.squashfs --alias bionic.20180617.arm64.local
+      touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+    executable: /bin/bash
+  vars:
+    ansible_flag_check_filename: "prepare.bionic.20180617.arm64.local"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
+
+
+- name: flush the LXD sqlite database
+  shell: |
+    lxd sql global .sync || true
+    lxd sql local .sync || true
+  changed_when:
+    false
+
