@@ -10,6 +10,15 @@
 
 #####################
 
+- name: apt install lxd
+  apt:
+    pkg:
+      - lxd
+      - lxd-client
+    update_cache: false
+  async: 3600
+  poll: 1
+
 - name: init lxd
   shell: |
     set -eu
@@ -67,11 +76,19 @@
   with_items:
     - { src: 'files/scripts/se_restart_lxd.sh', dest: '/etc/se_restart_lxd.sh' }
 
-- name: disable lxd autostart with systemd
+- name: disable lxd autostart with systemd (bionic)
   shell: |
     systemctl disable lxd
     systemctl disable lxd.socket
   changed_when: false
+  when: ansible_distribution_release == 'bionic'
+
+- name: disable lxd autostart with systemd (eoan or later)
+  shell: |
+    systemctl disable snap.lxd.activate.service
+    systemctl disable snap.lxd.daemon.service
+  changed_when: false
+  when: ansible_distribution_release != 'bionic'
 
 - name: add restart lxd to cron
   cron:
