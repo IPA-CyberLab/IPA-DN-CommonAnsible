@@ -83,13 +83,6 @@
   changed_when: false
   when: ansible_distribution_release == 'bionic'
 
-- name: disable lxd autostart with systemd (eoan or later)
-  shell: |
-    systemctl disable snap.lxd.activate.service
-    systemctl disable snap.lxd.daemon.service
-  changed_when: false
-  when: ansible_distribution_release != 'bionic'
-
 - name: add restart lxd to cron
   cron:
     name: "restart lxd midnight"
