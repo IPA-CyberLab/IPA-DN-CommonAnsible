@@ -500,8 +500,8 @@
     - { target: 'net.ipv4.icmp_ratelimit', new: '1' }
     - { target: 'net.ipv6.icmp.ratelimit', new: '1' }
     - { target: 'net.ipv4.icmp_errors_use_inbound_ifaddr', new: '1' }
-    - { target: 'kernel.sem', new: '65536 655360 64 655360' }
-    - { target: 'kernel.msgmni', new: '65536' }
+    - { target: 'kernel.sem', new: '65536 655360 64 32768' }
+    - { target: 'kernel.msgmni', new: '32768' }
     - { target: 'fs.inotify.max_queued_events', new: '1048576' }
     - { target: 'fs.inotify.max_user_instances', new: '1048576' }
     - { target: 'fs.inotify.max_user_watches', new: '1048576' }
