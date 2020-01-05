@@ -54,6 +54,7 @@
       force_stop: true
       timeout: "{{ lxd_container_config_timeout }}"
       devices: "{{ guest.devices }}"
+      url: '{{ lxd_socket_url | default("unix:/var/lib/lxd/unix.socket") }}'
 
   # - debug: msg="{{ guest_hostfile_var }}"
 

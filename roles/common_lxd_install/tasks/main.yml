@@ -193,6 +193,25 @@
 
 
 
+
+- name: prepare the lxd image - eoan.20191217.arm64.local
+  shell:
+    cmd: |
+      set -eu
+      mkdir -p /root/lxd-images/eoan.20191217.arm64.local/
+      cd /root/lxd-images/eoan.20191217.arm64.local/
+      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/20010503_ubuntu_1910_eoan_cloud_images/release-20191217/eoan/release-20191217/ubuntu-19.10-server-cloudimg-arm64-lxd.tar.xz
+      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/20010503_ubuntu_1910_eoan_cloud_images/release-20191217/eoan/release-20191217/ubuntu-19.10-server-cloudimg-arm64.squashfs
+      lxc image import ubuntu-19.10-server-cloudimg-arm64-lxd.tar.xz ubuntu-19.10-server-cloudimg-arm64.squashfs --alias eoan.20191217.arm64.local
+      touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+    executable: /bin/bash
+  vars:
+    ansible_flag_check_filename: "prepare.eoan.20191217.arm64.local"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
+
+
 - name: flush the LXD sqlite database
   shell: |
     lxd sql global .sync || true

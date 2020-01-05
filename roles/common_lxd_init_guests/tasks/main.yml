@@ -34,6 +34,8 @@
   when:
     ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
 
+# 注: ↑  apt-get -y update && apt-get -y install ifupdown libpython2.7-minimal libpython2.7-stdlib libpython-stdlib python python2.7 python2.7-minimal python-minimal の結果で収集
+
 - name: touch flags for LXD-related files
   shell: |
     touch /etc/ansible_flags/lxd-related-files-8 # increment the number when adds files
