@@ -12,6 +12,7 @@
         if [ ${ret} -eq 0 ]; then
         lxc init "{{ guest.from_image }}" "{{ guest.name }}"
         lxc config set "{{ guest.name }}" raw.lxc lxc.apparmor.profile=unconfined
+        lxc config set "{{ guest.name }}" volatile.idmap.next '[{"Isuid":true,"Isgid":false,"Hostid":100000,"Nsid":0,"Maprange":65536},{"Isuid":false,"Isgid":true,"Hostid":100000,"Nsid":0,"Maprange":65536}]'
         echo __changed__
         fi
         chmod 755 /vmdata1/
@@ -47,19 +48,24 @@
       executable: /bin/bash
     changed_when: false
 
-  - name: set devices and start / stop the LXD container "{{ guest.name }}"
+
+  - name: start / stop the LXD container "{{ guest.name }}"
     lxd_container:
       name: "{{ guest.name }}"
       ephemeral: false
       state: "{{ guest.state }}"
       force_stop: true
       timeout: "{{ lxd_container_config_timeout }}"
-      devices: "{{ guest.devices }}"
       url: '{{ lxd_socket_url | default("unix:/var/lib/lxd/unix.socket") }}'
 
-  # - debug: msg="{{ guest_hostfile_var }}"
 
-
+  - name: set devices to the LXD container "{{ guest.name }}"
+    lxd_container:
+      name: "{{ guest.name }}"
+      ephemeral: false
+      timeout: "{{ lxd_container_config_timeout }}"
+      devices: "{{ guest.devices }}"
+      url: '{{ lxd_socket_url | default("unix:/var/lib/lxd/unix.socket") }}'
 
 
   - name: prepare guest - "{{ guest.name }}"
@@ -205,7 +211,7 @@
     register:
       prepare_guest
     changed_when: " '__changed__' in prepare_guest.stdout "
-    when: false
+    when: true
 
   - name: reboot LXD guest - "{{ guest.name }}"
     shell:
