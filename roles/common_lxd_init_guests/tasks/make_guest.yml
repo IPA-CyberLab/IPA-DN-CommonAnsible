@@ -101,9 +101,14 @@
         ret=`ls /etc/netplan/ | wc -l`
         if [ ${ret} -ne 0 ]; then
         # Disable auto update
-        systemctl stop apt-daily.timer
-        systemctl disable apt-daily.timer
-        systemctl mask apt-daily.service
+        systemctl stop apt-daily.timer || true
+        systemctl disable apt-daily.timer || true
+        systemctl stop apt-daily.service || true
+        systemctl mask apt-daily.service || true
+        systemctl stop apt-daily-upgrade.service || true
+        systemctl mask apt-daily-upgrade.service || true
+        systemctl stop apt-daily-upgrade.timer || true
+        systemctl mask apt-daily-upgrade.timer || true
         systemctl daemon-reload
         dpkg -r unattended-upgrades
         dpkg -r cloud-init

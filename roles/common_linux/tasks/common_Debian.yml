@@ -12,6 +12,18 @@
 
 #####################
 
+- name: disable motd
+  shell:
+    cmd: |
+      set -eu
+      chmod -x /etc/update-motd.d/*
+      touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+    executable: /bin/bash
+  vars:
+    ansible_flag_check_filename: "disable_motd"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
 - name: uninstall unattended-upgrades
   apt:
     pkg:
