@@ -12,7 +12,10 @@
         if [ ${ret} -eq 0 ]; then
         lxc init "{{ guest.from_image }}" "{{ guest.name }}"
         lxc config set "{{ guest.name }}" raw.lxc lxc.apparmor.profile=unconfined
-        lxc config set "{{ guest.name }}" volatile.idmap.next '[{"Isuid":true,"Isgid":false,"Hostid":100000,"Nsid":0,"Maprange":65536},{"Isuid":false,"Isgid":true,"Hostid":100000,"Nsid":0,"Maprange":65536}]'
+        if [ $(lsb_release -cs) != "bionic" ]; then
+          # Eoan: set idmap manually
+          lxc config set "{{ guest.name }}" volatile.idmap.next '[{"Isuid":true,"Isgid":false,"Hostid":{{ lxd_root_uid | default("100000") }},"Nsid":0,"Maprange":65536},{"Isuid":false,"Isgid":true,"Hostid":{{ lxd_root_uid | default("100000") }},"Nsid":0,"Maprange":65536}]'
+        fi
         echo __changed__
         fi
         chmod 755 /vmdata1/
