@@ -17,6 +17,18 @@
     state: stopped
     enabled: false
 
+- name: Disable apt-daily-upgrade.timer
+  systemd:
+    name: apt-daily-upgrade.timer
+    state: stopped
+    enabled: false
+
+- name: Disable apt-daily-upgrade.service
+  systemd:
+    name: apt-daily-upgrade.service
+    state: stopped
+    enabled: false
+
 - name: update apt sources.list
   shell:
     cmd: |
@@ -85,7 +97,7 @@
     backup: true
     backrefs: false
   with_items:
-    - { target: 'PasswordAuthentication', new: 'no' }
+    - { target: 'PasswordAuthentication', new: "{{ 'yes' if (prepare_allow_ssh_password_auth | default()) else 'no' }}" }
     - { target: 'PubkeyAuthentication', new: 'yes' }
     - { target: 'PermitRootLogin', new: 'no' }
     - { target: 'PermitEmptyPasswords', new: 'no' }
@@ -169,6 +181,45 @@
     executable: /bin/bash
   changed_when: false
   when: (not (do_not_add_admin_user | default()))
+
+# 無意味!? 2020/01/05
+# - name: set subgid and subgid for root and lxd
+#   shell:
+#     cmd: |
+#       touch /etc/subuid
+#       touch /etc/subgid
+#       ret=`cat /etc/subuid | grep lxd | wc -l`
+#       if [ ${ret} -eq 0 ]; then
+#       cat <<\EOF >> /etc/subuid
+#       lxd:100000:65536
+#       EOF
+#       echo __changed__
+#       fi
+#       ret=`cat /etc/subuid | grep root | wc -l`
+#       if [ ${ret} -eq 0 ]; then
+#       cat <<\EOF >> /etc/subuid
+#       root:100000:65536
+#       EOF
+#       echo __changed__
+#       fi
+#       ret=`cat /etc/subgid | grep lxd | wc -l`
+#       if [ ${ret} -eq 0 ]; then
+#       cat <<\EOF >> /etc/subgid
+#       lxd:100000:65536
+#       EOF
+#       echo __changed__
+#       fi
+#       ret=`cat /etc/subgid | grep root | wc -l`
+#       if [ ${ret} -eq 0 ]; then
+#       cat <<\EOF >> /etc/subgid
+#       root:100000:65536
+#       EOF
+#       echo __changed__
+#       fi
+#     executable: /bin/bash
+#   register:
+#     set_subgid
+#   changed_when: " '__changed__' in set_subgid.stdout "
 
 - name: put .hushlogin
   shell:

@@ -12,6 +12,18 @@
 
 #####################
 
+- name: disable motd
+  shell:
+    cmd: |
+      set -eu
+      chmod -x /etc/update-motd.d/*
+      touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+    executable: /bin/bash
+  vars:
+    ansible_flag_check_filename: "disable_motd"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
 - name: uninstall unattended-upgrades
   apt:
     pkg:
@@ -39,6 +51,14 @@
     remove: yes
     force: yes
   when: (not (do_not_delete_user1 | default()))
+
+- name: delete user ubuntu if remains
+  user:
+    name: ubuntu
+    state: absent
+    remove: yes
+    force: yes
+  when: (delete_user_ubuntu | default())
 
 - name: apt change source servers to Japan 1
   replace:
@@ -223,24 +243,27 @@
   async: 3600
   poll: 1
 
-- name: Stop snapd.service
+- name: Stop snapd.service (only for bionic)
   systemd:
     name: snapd.service
     state: stopped
     enabled: false
+  when: ansible_distribution_release == 'bionic'
 
-- name: Stop apparmor
+- name: Stop apparmor (only for bionic)
   systemd:
     name: apparmor
     state: stopped
     enabled: false
+  when: ansible_distribution_release == 'bionic'
 
-- name: uninstall apparmor and snapd
+- name: uninstall apparmor and snapd (only for bionic)
   apt:
     pkg:
       - apparmor
       - snapd
     state: absent
+  when: ansible_distribution_release == 'bionic'
 
 # - name: set hostname
 #   hostname:
@@ -492,8 +515,8 @@
     - { target: 'net.ipv4.icmp_ratelimit', new: '1' }
     - { target: 'net.ipv6.icmp.ratelimit', new: '1' }
     - { target: 'net.ipv4.icmp_errors_use_inbound_ifaddr', new: '1' }
-    - { target: 'kernel.sem', new: '65536 655360 64 655360' }
-    - { target: 'kernel.msgmni', new: '65536' }
+    - { target: 'kernel.sem', new: '65536 655360 64 32768' }
+    - { target: 'kernel.msgmni', new: '32768' }
     - { target: 'fs.inotify.max_queued_events', new: '1048576' }
     - { target: 'fs.inotify.max_user_instances', new: '1048576' }
     - { target: 'fs.inotify.max_user_watches', new: '1048576' }
@@ -565,7 +588,7 @@
     - { src: 'files/scripts/init_rss.sh', dest: '/bin/init_rss.sh' }
     - { src: 'files/scripts/se_backup_simple_dir.sh', dest: '/bin/se_backup_simple_dir.sh' }
     - { src: 'files/scripts/se_backup_simple_dir_safe.sh', dest: '/bin/se_backup_simple_dir_safe.sh' }
-    - { src: 'files/scripts/se_snmp_temperature.sh', dest: '/etc/se_snmp_temperature.sh' }
+    - { src:  '{{ snmp_temperature_script_name | default("files/scripts/se_snmp_temperature.sh") }}', dest: '/etc/se_snmp_temperature.sh' }
     - { src: 'files/scripts/nic_disable_offload.sh', dest: '/bin/nic_disable_offload' }
     - { src: 'files/scripts/nic_enable_offload.sh', dest: '/bin/nic_enable_offload' }
     - { src: 'files/scripts/wait_for_network_init_3.debian.sh', dest: '/bin/wait_for_network_init_3' }

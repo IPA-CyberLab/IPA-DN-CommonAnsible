@@ -1,0 +1,233 @@
+- block:
+  - name: load guest "{{ guest.name }}" config file
+    include_vars:
+      file: "../{{ guest.guest_svc_group }}/hosts/host_vars/{{ guest.name }}.yml"
+      name: guest_hostfile_settings
+
+  - name: create LXD container "{{ guest.name }}"
+    shell:
+      cmd: |
+        set -eu
+        ret=`lxc list --format=json "{{ guest.name }}" | jq '. | length'`
+        if [ ${ret} -eq 0 ]; then
+        lxc init "{{ guest.from_image }}" "{{ guest.name }}"
+        lxc config set "{{ guest.name }}" raw.lxc lxc.apparmor.profile=unconfined
+        if [ $(lsb_release -cs) != "bionic" ]; then
+          # Eoan: set idmap manually
+          lxc config set "{{ guest.name }}" volatile.idmap.next '[{"Isuid":true,"Isgid":false,"Hostid":{{ lxd_root_uid | default("100000") }},"Nsid":0,"Maprange":65536},{"Isuid":false,"Isgid":true,"Hostid":{{ lxd_root_uid | default("100000") }},"Nsid":0,"Maprange":65536}]'
+        fi
+        echo __changed__
+        fi
+        chmod 755 /vmdata1/
+        chmod 755 /vmdata1/containers/
+        chmod 755 /vmdata1/containers/{{ guest.name }}/
+      executable: /bin/bash
+    register:
+      create_lxd_container
+    changed_when: " '__changed__' in create_lxd_container.stdout "
+
+  - name: apply config settings to the LXD container "{{ guest.name }}"
+    shell:
+      cmd: |
+        set -eu
+        {% for config_item in lxd_guests_default_config %}
+        {%  if (guest.config is not defined) or (guest.config is not iterable) or (not config_item in guest.config) %}
+        {%   if (lxd_guests_default_config[config_item] != "unset") %}
+        lxc config set {{ guest.name }} {{ config_item }} {{ lxd_guests_default_config[config_item] }}
+        {%   else %}
+        lxc config unset {{ guest.name }} {{ config_item }} || true
+        {%   endif %}
+        {%  endif %}
+        {% endfor %}
+        {% if (guest.config is defined) and (guest.config is iterable) %}
+        {%  for config_item in guest.config %}
+        {%   if (guest.config[config_item] != "unset") %}
+        lxc config set {{ guest.name }} {{ config_item }} {{ guest.config[config_item] }}
+        {%   else %}
+        lxc config unset {{ guest.name }} {{ config_item }} || true
+        {%   endif %}
+        {%  endfor %}
+        {% endif %}
+      executable: /bin/bash
+    changed_when: false
+
+
+  - name: start / stop the LXD container "{{ guest.name }}"
+    lxd_container:
+      name: "{{ guest.name }}"
+      ephemeral: false
+      state: "{{ guest.state }}"
+      force_stop: true
+      timeout: "{{ lxd_container_config_timeout }}"
+      url: '{{ lxd_socket_url | default("unix:/var/lib/lxd/unix.socket") }}'
+
+
+  - name: set devices to the LXD container "{{ guest.name }}"
+    lxd_container:
+      name: "{{ guest.name }}"
+      ephemeral: false
+      timeout: "{{ lxd_container_config_timeout }}"
+      devices: "{{ guest.devices }}"
+      url: '{{ lxd_socket_url | default("unix:/var/lib/lxd/unix.socket") }}'
+
+
+  - name: prepare guest - "{{ guest.name }}"
+    shell:
+      cmd: |
+        set -eu
+        lxc exec {{ guest.name }} -- mkdir -p /etc/ansible_files/
+        # for Ubuntu 18.04 - amd64
+        lxc file push /etc/ansible_files/ifupdown_0.8.17ubuntu1.1_amd64.deb {{ guest.name }}/etc/ansible_files/ifupdown_0.8.17ubuntu1.1_amd64.deb
+        lxc file push /etc/ansible_files/libpython2.7-minimal_2.7.15~rc1-1_amd64.deb {{ guest.name }}/etc/ansible_files/libpython2.7-minimal_2.7.15~rc1-1_amd64.deb
+        lxc file push /etc/ansible_files/libpython2.7-stdlib_2.7.15~rc1-1_amd64.deb {{ guest.name }}/etc/ansible_files/libpython2.7-stdlib_2.7.15~rc1-1_amd64.deb
+        lxc file push /etc/ansible_files/libpython-stdlib_2.7.15~rc1-1_amd64.deb {{ guest.name }}/etc/ansible_files/libpython-stdlib_2.7.15~rc1-1_amd64.deb
+        lxc file push /etc/ansible_files/python_2.7.15~rc1-1_amd64.deb {{ guest.name }}/etc/ansible_files/python_2.7.15~rc1-1_amd64.deb
+        lxc file push /etc/ansible_files/python2.7_2.7.15~rc1-1_amd64.deb {{ guest.name }}/etc/ansible_files/python2.7_2.7.15~rc1-1_amd64.deb
+        lxc file push /etc/ansible_files/python2.7-minimal_2.7.15~rc1-1_amd64.deb {{ guest.name }}/etc/ansible_files/python2.7-minimal_2.7.15~rc1-1_amd64.deb
+        lxc file push /etc/ansible_files/python-minimal_2.7.15~rc1-1_amd64.deb {{ guest.name }}/etc/ansible_files/python-minimal_2.7.15~rc1-1_amd64.deb
+        # for Ubuntu 19.10 - arm64
+        lxc file push /etc/ansible_files/ifupdown_0.8.35ubuntu1_arm64.deb {{ guest.name }}/etc/ansible_files/ifupdown_0.8.35ubuntu1_arm64.deb
+        lxc file push /etc/ansible_files/libpython2.7-minimal_2.7.17-1~19.10_arm64.deb {{ guest.name }}/etc/ansible_files/libpython2.7-minimal_2.7.17-1~19.10_arm64.deb
+        lxc file push /etc/ansible_files/libpython2.7-stdlib_2.7.17-1~19.10_arm64.deb {{ guest.name }}/etc/ansible_files/libpython2.7-stdlib_2.7.17-1~19.10_arm64.deb
+        lxc file push /etc/ansible_files/libpython2-stdlib_2.7.17-1_arm64.deb {{ guest.name }}/etc/ansible_files/libpython2-stdlib_2.7.17-1_arm64.deb
+        lxc file push /etc/ansible_files/libpython-stdlib_2.7.17-1_arm64.deb {{ guest.name }}/etc/ansible_files/libpython-stdlib_2.7.17-1_arm64.deb
+        lxc file push /etc/ansible_files/python_2.7.17-1_arm64.deb {{ guest.name }}/etc/ansible_files/python_2.7.17-1_arm64.deb
+        lxc file push /etc/ansible_files/python2.7_2.7.17-1~19.10_arm64.deb {{ guest.name }}/etc/ansible_files/python2.7_2.7.17-1~19.10_arm64.deb
+        lxc file push /etc/ansible_files/python2.7-minimal_2.7.17-1~19.10_arm64.deb {{ guest.name }}/etc/ansible_files/python2.7-minimal_2.7.17-1~19.10_arm64.deb
+        lxc file push /etc/ansible_files/python2_2.7.17-1_arm64.deb {{ guest.name }}/etc/ansible_files/python2_2.7.17-1_arm64.deb
+        lxc file push /etc/ansible_files/python2-minimal_2.7.17-1_arm64.deb {{ guest.name }}/etc/ansible_files/python2-minimal_2.7.17-1_arm64.deb
+        lxc file push /etc/ansible_files/python-minimal_2.7.17-1_arm64.deb {{ guest.name }}/etc/ansible_files/python-minimal_2.7.17-1_arm64.deb
+        sleep 0.5
+        cat <<\EOF2 | lxc file push - {{ guest.name }}/etc/ansible_files/lxd_container_prepare.sh
+        #!/bin/bash
+        set -eu
+        ret=`ls /etc/netplan/ | wc -l`
+        if [ ${ret} -ne 0 ]; then
+        # Disable auto update
+        systemctl stop apt-daily.timer || true
+        systemctl disable apt-daily.timer || true
+        systemctl stop apt-daily.service || true
+        systemctl mask apt-daily.service || true
+        systemctl stop apt-daily-upgrade.service || true
+        systemctl mask apt-daily-upgrade.service || true
+        systemctl stop apt-daily-upgrade.timer || true
+        systemctl mask apt-daily-upgrade.timer || true
+        systemctl daemon-reload
+        dpkg -r unattended-upgrades
+        dpkg -r cloud-init
+        if [ $(uname -i) = "aarch64" ]; then
+          # for Ubuntu 19.10 - arm64
+          dpkg -i /etc/ansible_files/libpython2.7-minimal_2.7.17-1~19.10_arm64.deb
+          dpkg -i /etc/ansible_files/python2.7-minimal_2.7.17-1~19.10_arm64.deb
+          dpkg -i /etc/ansible_files/libpython2.7-stdlib_2.7.17-1~19.10_arm64.deb
+          dpkg -i /etc/ansible_files/python2-minimal_2.7.17-1_arm64.deb
+          dpkg -i /etc/ansible_files/libpython2-stdlib_2.7.17-1_arm64.deb
+          dpkg -i /etc/ansible_files/python2.7_2.7.17-1~19.10_arm64.deb
+          dpkg -i /etc/ansible_files/python2_2.7.17-1_arm64.deb
+          dpkg -i /etc/ansible_files/ifupdown_0.8.35ubuntu1_arm64.deb
+          dpkg -i /etc/ansible_files/python-minimal_2.7.17-1_arm64.deb
+          dpkg -i /etc/ansible_files/libpython-stdlib_2.7.17-1_arm64.deb
+          dpkg -i /etc/ansible_files/python_2.7.17-1_arm64.deb
+        else
+          # for Ubuntu 18.04 - amd64
+          dpkg -i /etc/ansible_files/ifupdown_0.8.17ubuntu1.1_amd64.deb
+          dpkg -i /etc/ansible_files/libpython2.7-minimal_2.7.15~rc1-1_amd64.deb
+          dpkg -i /etc/ansible_files/python2.7-minimal_2.7.15~rc1-1_amd64.deb
+          dpkg -i /etc/ansible_files/python-minimal_2.7.15~rc1-1_amd64.deb
+          dpkg -i /etc/ansible_files/libpython2.7-stdlib_2.7.15~rc1-1_amd64.deb
+          dpkg -i /etc/ansible_files/libpython-stdlib_2.7.15~rc1-1_amd64.deb
+          dpkg -i /etc/ansible_files/python2.7_2.7.15~rc1-1_amd64.deb
+          dpkg -i /etc/ansible_files/python_2.7.15~rc1-1_amd64.deb
+        fi
+        #
+        cp -n /etc/ssh/sshd_config /etc/ssh/sshd_config.original
+        perl -pi -e 's/#UseDNS no/UseDNS no/g' /etc/ssh/sshd_config
+        perl -pi -e 's/#MaxSessions 10/MaxSessions 128/g' /etc/ssh/sshd_config
+        perl -pi -e 's/\#PermitRootLogin prohibit\-password/PermitRootLogin no/g' /etc/ssh/sshd_config
+        perl -pi -e 's/PasswordAuthentication no/PasswordAuthentication no/g' /etc/ssh/sshd_config
+        perl -pi -e 's/\#PubkeyAuthentication yes/PubkeyAuthentication yes/g' /etc/ssh/sshd_config
+        {% if (guest_hostfile_settings.lxd_guest_prepare_sshd_port is defined) %}
+        perl -pi -e 's/#Port 22/Port {{ guest_hostfile_settings.lxd_guest_prepare_sshd_port }}/g' /etc/ssh/sshd_config
+        {% endif %}
+        systemctl disable systemd-resolved
+        systemctl stop systemd-resolved
+        rm /etc/resolv.conf
+        cat <<\EOF > /etc/resolv.conf
+        nameserver 8.8.8.8
+        nameserver 8.8.4.4
+        EOF
+        echo {{ guest.name }} > /etc/hostname
+        hostname -F /etc/hostname
+        # network setting
+        cat <<\EOF > /etc/network/interfaces
+        {{ guest_hostfile_settings.ip_settings_prepare_tmp if (guest_hostfile_settings.ip_settings_prepare_tmp is defined) else guest_hostfile_settings.ip_settings }}
+        EOF
+        # disable cloud
+        rm -f /etc/netplan/50-cloud-init.yaml
+        # apt sources list
+        cp -n /etc/apt/sources.list /etc/apt/sources.list.original.3
+        ubuntu_release=$(lsb_release -cs)
+        base_url="{{ guest_hostfile_settings.lxd_guest_apt_base_url | default('http://jp.archive.ubuntu.com/ubuntu') }}"
+        cat <<EOF_APT > /etc/apt/sources.list
+        deb $base_url $ubuntu_release main restricted
+        deb $base_url $ubuntu_release-updates main restricted
+        deb $base_url $ubuntu_release universe
+        deb $base_url $ubuntu_release-updates universe
+        deb $base_url $ubuntu_release multiverse
+        deb $base_url $ubuntu_release-updates multiverse
+        deb $base_url $ubuntu_release-backports main restricted universe multiverse
+        deb $base_url $ubuntu_release-security main restricted
+        deb $base_url $ubuntu_release-security universe
+        deb $base_url $ubuntu_release-security multiverse
+        EOF_APT
+        # add common admin user
+        useradd -s /bin/bash -m -d /home/{{ common_admin_user_name }}/ -c "{{ common_admin_user_comment }}" -p '{{ common_admin_hashed_password }}' {{ common_admin_user_name }}
+        gpasswd -a {{ common_admin_user_name }} sudo
+        mkdir -p /home/{{ common_admin_user_name }}/.ssh/
+        chown {{ common_admin_user_name }} /home/{{ common_admin_user_name }}/.ssh/
+        chmod 700 /home/{{ common_admin_user_name }}/.ssh/
+        echo "{{ common_admin_ssh_public_key }}" >> /home/{{ common_admin_user_name }}/.ssh/authorized_keys
+        chown {{ common_admin_user_name }} /home/{{ common_admin_user_name }}/.ssh/authorized_keys
+        chmod 600 /home/{{ common_admin_user_name }}/.ssh/authorized_keys
+        # add my user
+        useradd -s /bin/bash -m -d /home/{{ my_user_name }}/ -c "{{ my_user_comment }}" -p '{{ my_user_password | password_hash('sha512') }}' {{ my_user_name }}
+        gpasswd -a {{ my_user_name }} sudo
+        mkdir -p /home/{{ my_user_name }}/.ssh/
+        chown {{ my_user_name }} /home/{{ my_user_name }}/.ssh/
+        chmod 700 /home/{{ my_user_name }}/.ssh/
+        echo "{{ my_user_ssh_public_key }}" >> /home/{{ my_user_name }}/.ssh/authorized_keys
+        chown {{ my_user_name }} /home/{{ my_user_name }}/.ssh/authorized_keys
+        chmod 600 /home/{{ my_user_name }}/.ssh/authorized_keys
+        echo "{{ my_user_name }} ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+        echo >> /etc/sudoers
+        echo "Defaults    env_keep+=SSH_AUTH_SOCK" >> /etc/sudoers
+        touch /home/{{ my_user_name }}/.hushlogin
+        # Init SSH keys
+        /bin/rm -v /etc/ssh/ssh_host_* || true
+        dpkg-reconfigure -f noninteractive openssh-server
+        # finalize
+        rm -f /etc/netplan/*
+        echo __changed__
+        fi
+        EOF2
+        sleep 0.5
+        lxc exec {{ guest.name }} -- chmod 700 /etc/ansible_files/lxd_container_prepare.sh
+        sleep 0.5
+        lxc exec {{ guest.name }} -- /etc/ansible_files/lxd_container_prepare.sh
+        sleep 0.5
+      executable: /bin/bash
+    register:
+      prepare_guest
+    changed_when: " '__changed__' in prepare_guest.stdout "
+    when: true
+
+  - name: reboot LXD guest - "{{ guest.name }}"
+    shell:
+      cmd: |
+        set -eu
+        lxc restart --force {{ guest.name }}
+      executable: /bin/bash
+    when: prepare_guest.changed
+
+  when: (guestname is not defined) or (guestname == guest.name)
+
