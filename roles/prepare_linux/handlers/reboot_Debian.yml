@@ -1,7 +1,7 @@
 - name: reboot - reboot the host
   shell:
     cmd: |
-      /usr/bin/nohup /usr/bin/bash -c "sync; sleep 3; /sbin/reboot --force; /sbin/reboot" &
+      nohup bash -c "sync; sleep 3; /sbin/reboot --force; /sbin/reboot" &
     executable: /bin/bash
   ignore_errors: true
 
