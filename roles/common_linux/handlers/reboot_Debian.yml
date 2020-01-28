@@ -2,6 +2,7 @@
   shell: |
     touch /etc/ansible_flags/first_install_rebooted
   changed_when: false
+  when: (not (no_reboot | default()))
 
 - name: reboot - reboot the host
   shell:
@@ -9,6 +10,7 @@
       nohup bash -c "sync; sleep 3; /sbin/reboot --force; /sbin/reboot" &
     executable: /bin/bash
   ignore_errors: true
+  when: (not (no_reboot | default()))
 
 - name: reboot - wait for host down
   wait_for:
