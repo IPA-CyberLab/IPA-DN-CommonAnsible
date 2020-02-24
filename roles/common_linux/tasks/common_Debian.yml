@@ -159,6 +159,8 @@
       - dstat
       - apt-transport-https
       - net-tools
+      - flex
+      - bison
     update_cache: false
   when: ansible_distribution_release == 'bionic'
   async: 3600
@@ -238,6 +240,8 @@
       - dstat
       - apt-transport-https
       - net-tools
+      - flex
+      - bison
     update_cache: false
   when: ansible_distribution_release == 'eoan'
   async: 3600
