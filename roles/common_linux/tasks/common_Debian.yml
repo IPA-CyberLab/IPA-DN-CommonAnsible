@@ -472,10 +472,16 @@
 - name: install and run snmpwork
   shell:
     cmd: |
-      bash <(curl -s https://ossvault.open.ad.jp/vault/pub/open/snmpwork/snmpwork_install.sh)
+      if [ ! -f /etc/se_snmpwork/install_script_called.txt ]; then
+        bash <(curl -s https://ossvault.open.ad.jp/vault/pub/open/snmpwork/snmpwork_install.sh)
+        echo __installed123__
+      fi
     executable: /bin/bash
+  register:
+    install_snmpwork_stdout
   when:
-    ((snmpwork_install | default(false)) and ((ansible_flags | json_query("files[?path=='/etc/se_snmpwork/install_script_called.txt'].path") | length()) == 0))
+    (snmpwork_install | default(false))
+  changed_when: " '__installed123__' in install_snmpwork_stdout.stdout "
 
 - name: restart snmpd
   systemd:
