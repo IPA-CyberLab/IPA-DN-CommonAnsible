@@ -582,6 +582,14 @@
     dest: "/etc/logrotate.conf"
     backup: true
 
+- name: create /var/log/old/
+  file:
+    path: /var/log/old/
+    state: directory
+    owner: root
+    mode: 0777
+  changed_when: false
+
 - name: move /etc/cron.daily/logrotate to /etc/cron.hourly/logrotate
   shell:
     mv /etc/cron.daily/logrotate /etc/cron.hourly/logrotate && echo __ok__ || echo __ng__
