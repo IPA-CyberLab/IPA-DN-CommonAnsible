@@ -435,7 +435,7 @@
   when: update_journald.changed
 
 - name: upload /etc/snmp/snmpd.conf
-  copy:
+  template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     backup: true
@@ -448,6 +448,34 @@
     name: snmpd
     state: "{{ 'stopped' if (disable_snmp | default()) else 'started' }}"
     enabled: "{{ false if (disable_snmp | default()) else true }}"
+
+- name: create snmpwork config file directory
+  file:
+    path: /etc/se_snmpwork/Local/App_TestDev/Config/
+    state: directory
+    owner: root
+    mode: 0755
+  when:
+    (snmpwork_install | default(false))
+  changed_when: false
+
+- name: install snmpwork config file
+  template:
+    src: files/settings/SnmpWork.json.j2
+    dest: /etc/se_snmpwork/Local/App_TestDev/Config/SnmpWork.json
+    mode: 0644
+    backup: true
+  when:
+    (snmpwork_install | default(false))
+  changed_when: false
+
+- name: install and run snmpwork
+  shell:
+    cmd: |
+      bash <(curl -s https://ossvault.open.ad.jp/vault/pub/open/snmpwork/snmpwork_install.sh)
+    executable: /bin/bash
+  when:
+    ((snmpwork_install | default(false)) and ((ansible_flags | json_query("files[?path=='/etc/se_snmpwork/install_script_called.txt'].path") | length()) == 0))
 
 - name: restart snmpd
   systemd:

@@ -1,0 +1,14 @@
+
+{
+    "HttpPort": 7007,
+    "PingTargets": "{{ snmpwork_ping_targets | default("ping4.test.sehosts.com=IPv4 Internet,ping6.test.sehosts.com=IPv6 Internet") }}",
+    "PktLossIntervalMsec": 100,
+    "PktLossTimeoutMsecs": 500,
+    "PktLossTryCount": 100,
+    "PollingIntervalsSec": 60,
+    "SpeedIntervalsSec": 600,
+    "SpeedSpanSec": 7,
+    "SpeedTargets": "{{ snmpwork_speed_targets | default("speed4.test.sehosts.com|9821=IPv4 Internet,speed6.test.sehosts.com|9821=IPv6 Internet") }}",
+    "SpeedTryCount": 5
+}
+
