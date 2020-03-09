@@ -466,7 +466,7 @@
     mode: 0644
     backup: true
   when:
-    (snmpwork_install | default(false))
+    ((snmpwork_install | default(false)) and (not (snmpwork_manual_config | default(false))))
   changed_when: false
 
 - name: install and run snmpwork
