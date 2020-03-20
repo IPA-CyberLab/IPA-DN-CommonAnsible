@@ -104,6 +104,29 @@
     - { target: 'UseDNS', new: 'no' }
     - { target: 'MaxSessions', new: '128' }
 
+- name: Configure /etc/systemd/system/network-online.target.wants/networking.service
+  lineinfile:
+    dest: /etc/systemd/system/network-online.target.wants/networking.service
+    regexp: '^#*{{ item.target }} *=.*$'
+    line: '{{ item.target }}={{ item.new }}'
+    state: present
+    backup: true
+    backrefs: false
+  with_items:
+    - { target: 'TimeoutStartSec', new: '10s' }
+
+- name: Configure /etc/dhcp/dhclient.conf
+  lineinfile:
+    dest: /etc/dhcp/dhclient.conf
+    regexp: '^#*{{ item.target }} +.*$'
+    line: '{{ item.target }} {{ item.new }};'
+    state: present
+    backup: true
+    backrefs: false
+  with_items:
+    - { target: 'timeout', new: '10' }
+    - { target: 'send dhcp-client-identifier', new: '= hardware' }
+
 - name: Backup original /etc/systemd/resolved.conf file
   copy:
     remote_src: true
