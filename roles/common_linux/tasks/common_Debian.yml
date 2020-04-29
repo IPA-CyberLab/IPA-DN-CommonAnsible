@@ -634,6 +634,7 @@
     - { src: 'files/scripts/init_rss.sh', dest: '/bin/init_rss.sh' }
     - { src: 'files/scripts/se_backup_simple_dir.sh', dest: '/bin/se_backup_simple_dir.sh' }
     - { src: 'files/scripts/se_backup_simple_dir_safe.sh', dest: '/bin/se_backup_simple_dir_safe.sh' }
+    - { src: 'files/scripts/se_backup_lxd_containers_safe.sh', dest: '/bin/se_backup_lxd_containers_safe.sh' }
     - { src:  '{{ snmp_temperature_script_name | default("files/scripts/se_snmp_temperature.sh") }}', dest: '/etc/se_snmp_temperature.sh' }
     - { src: 'files/scripts/nic_disable_offload.sh', dest: '/bin/nic_disable_offload' }
     - { src: 'files/scripts/nic_enable_offload.sh', dest: '/bin/nic_enable_offload' }
