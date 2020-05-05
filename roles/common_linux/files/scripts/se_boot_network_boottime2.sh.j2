@@ -1,9 +1,9 @@
 #!/bin/bash
-
+{{ "/etc/se_snmpwork_start.sh" if (snmpwork_install | default(false)) else "" }}
 # -- begin network_boottime_2 --
 
 {{ (network_boottime_2 | default()) }}
-{{ "/etc/se_snmpwork_start.sh" if (snmpwork_install | default(false)) else "" }}
+
 # -- end network_boottime_2 --
 
 
