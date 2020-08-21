@@ -25,7 +25,7 @@
       rm -fr /usr/share/dotnet3_1_1_arm64/
       mkdir -p /usr/share/dotnet3_1_1_arm64/
       tar zxf dotnet-sdk-3.1.101-linux-arm64.tar.gz -C /usr/share/dotnet3_1_1_arm64/
-      ln -s /usr/share/dotnet3_1_1_arm64/dotnet /usr/bin/dotnet
+      ln -s -f /usr/share/dotnet3_1_1_arm64/dotnet /usr/bin/dotnet
       # Finalize
       cat <<\EOF >> /root/.bashrc_addtional
       export DOTNET_CLI_TELEMETRY_OPTOUT=1
