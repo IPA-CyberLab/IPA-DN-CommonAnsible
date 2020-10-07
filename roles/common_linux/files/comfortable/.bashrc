@@ -11,7 +11,9 @@ export PS1='[\u@\h \w]\$ '
 export EDITOR='emacs -nw'
 export LANG=en_US.UTF-8
 export TMOUT=268435456
+export HISTSIZE=100000
 export HISTFILESIZE=100000
+export HISTTIMEFORMAT='%F %T '
 
 if [ -f ~/.bashrc_addtional ]; then
     . ~/.bashrc_addtional
