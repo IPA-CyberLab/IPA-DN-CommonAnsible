@@ -1,0 +1,37 @@
+- name: init ansible_flags directory
+  shell: mkdir -p /etc/ansible_flags/ || true
+  changed_when: false
+
+- name: read ansible_flags
+  find:
+    paths: /etc/ansible_flags/
+  register:
+    ansible_flags
+
+#####################
+
+- name: install_dotnet_core_5_0_rtm
+  shell:
+    cmd: |
+      set -eu
+      # Download
+      rm -fr /root/install_dotnet_core_5_0_rtm/
+      mkdir -p /root/install_dotnet_core_5_0_rtm/
+      cd /root/install_dotnet_core_5_0_rtm/
+      wget --no-check-certificate -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+      # Install
+      dpkg -i packages-microsoft-prod.deb
+      apt-get -y update && apt-get -y install apt-transport-https && apt-get -y update && apt-get -y install dotnet-sdk-5.0
+      # Finalize
+      cat <<\EOF >> /root/.bashrc_addtional
+      export DOTNET_CLI_TELEMETRY_OPTOUT=1
+      EOF
+      dotnet tool uninstall -g dotnet-dump || true
+      dotnet tool install -g dotnet-dump || true
+      touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+    executable: /bin/bash
+  vars:
+    ansible_flag_check_filename: "install_dotnet_core_5_0_rtm"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
