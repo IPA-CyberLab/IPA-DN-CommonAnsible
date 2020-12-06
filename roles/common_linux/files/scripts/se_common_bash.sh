@@ -2,21 +2,27 @@
 alias root='sudo -H -i -u root bash'
 alias en='sudo -H -i -u root bash'
 alias reboot='echo Rebooting forcefully. Syncing... ; sync ; sync ; sync ; echo Sync OK. Rebooting... ; sleep 0.5 ; /sbin/reboot --force'
-alias bios_reboot='echo Rebooting forcefully 2. Syncing... ; sync ; sync ; sync ; echo Sync OK. Rebooting with BIOS... ; sleep 0.5 ; echo 1 > /proc/sys/kernel/sysrq ; echo b > /proc/sysrq-trigger ; echo Perhaps triggered'
+alias rebootbios='echo Rebooting forcefully 2. Syncing... ; sync ; sync ; sync ; echo Sync OK. Rebooting with BIOS... ; sleep 0.5 ; echo 1 > /proc/sys/kernel/sysrq ; echo b > /proc/sysrq-trigger ; echo Perhaps triggered'
 alias svcrunning='systemctl list-units --type=service'
-alias svcall='systemctl list-unit-files --type=service'
+alias svcall='systemctl list-unit-files --type=service --no-pager'
 alias svcstart='systemctl start'
 alias svcstop='systemctl stop'
 alias svcrestart='systemctl restart'
 alias svcenable='systemctl enable'
 alias svcdisable='systemctl disable'
-alias svcstat='systemctl status'
-alias svcstat2='systemctl status -l'
+alias svcstat='systemctl status --no-pager'
+alias svcstat2='systemctl status -l --no-pager'
 alias cpus='mpstat -P ALL 1'
 alias loads='dstat --nocolor --float --bits -tclmnd --socket'
 alias socks='watch -n 1 cat /proc/net/sockstat'
 alias ios='iostat -dmxt 1'
 alias fpath='readlink -f'
+alias proc='ps ww -H -eo pid,lstart,wchan,time,vsize,rssize,stat,tname,euser,pcpu,pid,thcount,cmd'
+alias thread='ps ww -m -eo pid,lstart,wchan,time,vsize,rssize,stat,tname,euser,pcpu,thcount,lwp,cmd'
+
+function sortdir() {
+  command du -x -h -d 1 $@ | sort -h
+}
 
 # same to .bashrc
 alias ls='ls --color=auto --time-style="+%Y-%m-%d %H:%M"'
