@@ -19,13 +19,37 @@ alias ios='iostat -dmxt 1'
 alias fpath='readlink -f'
 alias proc='ps ww -H -eo pid,lstart,wchan,time,vsize,rssize,stat,tname,euser,pcpu,pid,thcount,cmd'
 alias thread='ps ww -m -eo pid,lstart,wchan,time,vsize,rssize,stat,tname,euser,pcpu,thcount,lwp,cmd'
+alias lxclist='lxc list -c nsN46lc,boot.autostart:boot,volatile.last_state.power:last'
+
+function lxcsetboot()
+{
+  command lxc config set $1 boot.autostart true
+}
+
+function lxcdisableboot()
+{
+  command lxc config set $1 boot.autostart false
+}
+
+function lxcunsetboot()
+{
+  command lxc config unset $1 boot.autostart
+}
 
 function sortdir() {
   command du -x -h -d 1 $@ | sort -h
 }
 
+function ff() {
+  command find $2 -iname "*$1*" $3 $4 $5 $6 $7 $8 $9 | xargs -n 1 -r -P 1 -IXXX ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S" -apd1h XXX
+}
+
+function fff() {
+  command find $2 -iname "*$1*" $3 $4 $5 $6 $7 $8 $9 | xargs -n 1 -r -P 1 -IXXX ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S" -lapd1h XXX
+}
+
 # same to .bashrc
-alias ls='ls --color=auto --time-style="+%Y-%m-%d %H:%M"'
+alias ls='ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S"'
 alias emacs='emacs -nw'
 export PS1='[\u@\h \w]\$ '
 export EDITOR='emacs -nw'

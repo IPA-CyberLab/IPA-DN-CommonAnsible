@@ -5,7 +5,7 @@ fi
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
-alias ls='ls --color=auto --time-style="+%Y-%m-%d %H:%M"'
+alias ls='ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S"'
 alias emacs='emacs -nw'
 export PS1='[\u@\h \w]\$ '
 export EDITOR='emacs -nw'
