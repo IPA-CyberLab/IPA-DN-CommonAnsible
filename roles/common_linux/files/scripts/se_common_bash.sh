@@ -17,4 +17,13 @@ alias socks='watch -n 1 cat /proc/net/sockstat'
 alias ios='iostat -dmxt 1'
 alias fpath='readlink -f'
 
-
+# same to .bashrc
+alias ls='ls --color=auto --time-style="+%Y-%m-%d %H:%M"'
+alias emacs='emacs -nw'
+export PS1='[\u@\h \w]\$ '
+export EDITOR='emacs -nw'
+export LANG=en_US.UTF-8
+export TMOUT=268435456
+export HISTSIZE=100000
+export HISTFILESIZE=100000
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
