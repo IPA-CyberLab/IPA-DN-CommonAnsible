@@ -1,7 +1,8 @@
 # by dnobori
 alias root='sudo -H -i -u root bash'
 alias en='sudo -H -i -u root bash'
-alias reboot='echo Rebooting forcefully ... ; sync ; sync ; sync ; sleep 0.5 ; /sbin/reboot --force'
+alias reboot='echo Rebooting forcefully. Syncing... ; sync ; sync ; sync ; echo Sync OK. Rebooting... ; sleep 0.5 ; /sbin/reboot --force'
+alias bios_reboot='echo Rebooting forcefully 2. Syncing... ; sync ; sync ; sync ; echo Sync OK. Rebooting with BIOS... ; sleep 0.5 ; echo 1 > /proc/sys/kernel/sysrq ; echo b > /proc/sysrq-trigger ; echo Perhaps triggered'
 alias svcrunning='systemctl list-units --type=service'
 alias svcall='systemctl list-unit-files --type=service'
 alias svcstart='systemctl start'
