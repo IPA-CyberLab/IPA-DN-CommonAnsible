@@ -427,7 +427,7 @@
   with_items:
     - { target: 'ForwardToSyslog', new: 'yes' }
     - { target: 'SystemMaxUse', new: '100MB' }
-    - { target: 'SystemMaxFileSize', new: '10MB' }
+    - { target: 'SystemMaxFileSize', new: '1MB' }
 
 - name: restart journald
   systemd:
