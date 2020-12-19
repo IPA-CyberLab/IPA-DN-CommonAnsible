@@ -426,8 +426,8 @@
   register: update_journald
   with_items:
     - { target: 'ForwardToSyslog', new: 'yes' }
-    - { target: 'SystemMaxUse', new: '100MB' }
-    - { target: 'SystemMaxFileSize', new: '1MB' }
+    - { target: 'SystemMaxUse', new: '100M' }
+    - { target: 'SystemMaxFileSize', new: '1M' }
 
 - name: restart journald
   systemd:
