@@ -703,6 +703,22 @@
     state: started
     enabled: true
 
+- name: Allow TLSv1
+  shell:
+    cmd: |
+      set -eu
+      cp -n /etc/ssl/openssl.cnf /etc/ssl/openssl.cnf.original210111
+      c1=$(cat /etc/ssl/openssl.cnf | grep -F SECLEVEL=1 | wc -l)
+      if [ $c1 -eq 0 ]; then
+        sed -i '1i openssl_conf = default_conf' /etc/ssl/openssl.cnf && echo -e "\n[ default_conf ]\nssl_conf = ssl_sect\n[ssl_sect]\nsystem_default = system_default_sect\n[system_default_sect]\nMinProtocol = TLSv1\nCipherString = DEFAULT:@SECLEVEL=1" >> /etc/ssl/openssl.cnf
+      fi
+      touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
+    executable: /bin/bash
+  vars:
+    ansible_flag_check_filename: "allow_tlsv1"
+  when:
+    ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
+
 
 ## Special tasks
 - name: special - install Intel i40e-update driver - copy files
