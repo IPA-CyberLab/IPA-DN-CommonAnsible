@@ -156,8 +156,8 @@
       set -eu
       mkdir -p /root/lxd-images/bionic.20180617.amd64.local/
       cd /root/lxd-images/bionic.20180617.amd64.local/
-      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/19110501_ubuntu_1804_bionic_cloud_images/release-20180617/bionic/release-20180617/ubuntu-18.04-server-cloudimg-amd64-lxd.tar.xz
-      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/19110501_ubuntu_1804_bionic_cloud_images/release-20180617/bionic/release-20180617/ubuntu-18.04-server-cloudimg-amd64.squashfs
+      wget --no-check-certificate --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" https://static.lts.dn.ipantt.net/d/210111_001_lxd_cloud_images_96306/ubuntu-18.04-server-cloudimg-amd64-lxd.tar.xz
+      wget --no-check-certificate --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" https://static.lts.dn.ipantt.net/d/210111_001_lxd_cloud_images_96306/ubuntu-18.04-server-cloudimg-amd64.squashfs
       lxc image import ubuntu-18.04-server-cloudimg-amd64-lxd.tar.xz ubuntu-18.04-server-cloudimg-amd64.squashfs --alias bionic.20180617.amd64.local
       touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
     executable: /bin/bash
@@ -174,8 +174,8 @@
       set -eu
       mkdir -p /root/lxd-images/bionic.20180617.arm64.local/
       cd /root/lxd-images/bionic.20180617.arm64.local/
-      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/19110501_ubuntu_1804_bionic_cloud_images/release-20180617/bionic/release-20180617/ubuntu-18.04-server-cloudimg-arm64-lxd.tar.xz
-      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/19110501_ubuntu_1804_bionic_cloud_images/release-20180617/bionic/release-20180617/ubuntu-18.04-server-cloudimg-arm64.squashfs
+      wget --no-check-certificate --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" https://static.lts.dn.ipantt.net/d/210111_001_lxd_cloud_images_96306/ubuntu-18.04-server-cloudimg-arm64-lxd.tar.xz
+      wget --no-check-certificate --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" https://static.lts.dn.ipantt.net/d/210111_001_lxd_cloud_images_96306/ubuntu-18.04-server-cloudimg-arm64.squashfs
       lxc image import ubuntu-18.04-server-cloudimg-arm64-lxd.tar.xz ubuntu-18.04-server-cloudimg-arm64.squashfs --alias bionic.20180617.arm64.local
       touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
     executable: /bin/bash
@@ -193,8 +193,8 @@
       set -eu
       mkdir -p /root/lxd-images/eoan.20191217.arm64.local/
       cd /root/lxd-images/eoan.20191217.arm64.local/
-      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/20010503_ubuntu_1910_eoan_cloud_images/release-20191217/eoan/release-20191217/ubuntu-19.10-server-cloudimg-arm64-lxd.tar.xz
-      wget --no-check-certificate https://ossvault.open.ad.jp/vault/oss/20010503_ubuntu_1910_eoan_cloud_images/release-20191217/eoan/release-20191217/ubuntu-19.10-server-cloudimg-arm64.squashfs
+      wget --no-check-certificate --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" https://static.lts.dn.ipantt.net/d/210111_001_lxd_cloud_images_96306/ubuntu-19.10-server-cloudimg-arm64-lxd.tar.xz
+      wget --no-check-certificate --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" https://static.lts.dn.ipantt.net/d/210111_001_lxd_cloud_images_96306/ubuntu-19.10-server-cloudimg-arm64.squashfs
       lxc image import ubuntu-19.10-server-cloudimg-arm64-lxd.tar.xz ubuntu-19.10-server-cloudimg-arm64.squashfs --alias eoan.20191217.arm64.local
       touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
     executable: /bin/bash

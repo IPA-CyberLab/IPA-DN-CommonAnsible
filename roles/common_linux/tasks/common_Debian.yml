@@ -475,7 +475,7 @@
   shell:
     cmd: |
       if [ ! -f /etc/se_snmpwork/install_script_called.txt ]; then
-        bash <(curl -s https://ossvault.open.ad.jp/vault/pub/open/snmpwork/snmpwork_install.sh)
+        bash <(curl -4 --insecure --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" --raw --silent https://static.lts.dn.ipantt.net/d/210110_006_snmpwork_50463/snmpwork_install.sh)
         echo __installed123__
       fi
     executable: /bin/bash

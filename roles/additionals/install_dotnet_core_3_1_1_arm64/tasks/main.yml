@@ -19,7 +19,7 @@
       rm -fr /tmp/dotnet3_1_1_arm64/
       mkdir /tmp/dotnet3_1_1_arm64/
       cd /tmp/dotnet3_1_1_arm64/
-      wget http://ossvault.open.ad.jp/vault/oss/20012701_dotnet_core_3_1_1/dotnet_sdk/dotnet-sdk-3.1.101-linux-arm64.tar.gz
+      wget --no-check-certificate --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" https://static.lts.dn.ipantt.net/d/210111_002_microsoft_dotnet_sdk_12255/dotnet-sdk-3.1.101-linux-arm64.tar.gz
 
       # Install
       rm -fr /usr/share/dotnet3_1_1_arm64/

@@ -8,7 +8,7 @@
     "PollingIntervalsSec": 60,
     "SpeedIntervalsSec": 600,
     "SpeedSpanSec": 7,
-    "SpeedTargets": "{{ snmpwork_speed_targets | default("speed4.test.sehosts.com|9821=IPv4 Internet,speed6.test.sehosts.com|9821=IPv6 Internet") }}",
+    "SpeedTargets": "{{ snmpwork_speed_targets | default("none") }}",
     "SpeedTryCount": 5
 }
 
