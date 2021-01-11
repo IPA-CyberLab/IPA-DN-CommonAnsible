@@ -1,4 +1,5 @@
 #!/bin/bash
+{{ "" if (disable_st_ntpdate_loop | default(false)) else "/etc/se_ntpdate_start.sh" }}
 {{ "/etc/se_snmpwork_start.sh" if (snmpwork_install | default(false)) else "" }}
 # -- begin network_boottime_2 --
 

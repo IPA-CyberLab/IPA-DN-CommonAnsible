@@ -162,6 +162,7 @@
       - net-tools
       - flex
       - bison
+      - ntpdate
     update_cache: false
   when: ansible_distribution_release == 'bionic'
   async: 3600
@@ -244,6 +245,7 @@
       - net-tools
       - flex
       - bison
+      - ntpdate
     update_cache: false
   when: ansible_distribution_release == 'eoan'
   async: 3600
@@ -325,6 +327,7 @@
       - net-tools
       - flex
       - bison
+      - ntpdate
     update_cache: false
   when: ansible_distribution_release == 'focal'
   async: 3600
@@ -732,6 +735,8 @@
     - { src: 'files/scripts/se_connect_to_nfs.sh', dest: '/etc/se_connect_to_nfs.sh' }
     - { src: 'files/scripts/se_check_nfs_health_reboot_if_fail.sh', dest: '/etc/se_check_nfs_health_reboot_if_fail.sh' }
     - { src: 'files/scripts/se_check_nfs_health_killall_if_fail.sh', dest: '/etc/se_check_nfs_health_killall_if_fail.sh' }
+    - { src: 'files/scripts/se_ntpdate_start.sh', dest: '/etc/se_ntpdate_start.sh' }
+    - { src: 'files/scripts/se_ntpdate_loop.sh', dest: '/etc/se_ntpdate_loop.sh' }
     - { src: 'files/settings/sysstat.txt', dest: '/etc/default/sysstat' }
 
 - name: upload se_boot_network_boottime1.sh

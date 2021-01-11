@@ -21,6 +21,7 @@ alias fpath='readlink -f'
 alias proc='ps ww -H -eo pid,lstart,wchan,time,vsize,rssize,stat,tname,euser,pcpu,pid,thcount,cmd'
 alias thread='ps ww -m -eo pid,lstart,wchan,time,vsize,rssize,stat,tname,euser,pcpu,thcount,lwp,cmd'
 alias lxclist='lxc list -c nsN46lc,boot.autostart:boot,volatile.last_state.power:last'
+alias readlog='journalctl -xe'
 
 function lxcsetboot()
 {
