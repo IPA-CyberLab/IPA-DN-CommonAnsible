@@ -82,6 +82,7 @@
   ignore_errors: true
   changed_when: false
 
+# 18.04
 - name: apt install (bionic)
   apt:
     pkg:
@@ -166,6 +167,7 @@
   async: 3600
   poll: 1
 
+# 19.10
 - name: apt install (eoan)
   apt:
     pkg:
@@ -244,6 +246,87 @@
       - bison
     update_cache: false
   when: ansible_distribution_release == 'eoan'
+  async: 3600
+  poll: 1
+
+# 20.04
+- name: apt install (focal)
+  apt:
+    pkg:
+      - ssh
+      - iputils-ping
+      - dnsutils
+      - wget
+      - ifupdown
+      - bc
+      - build-essential
+      - cifs-utils
+      - cmake
+      - conntrack
+      - cu
+      - cvs
+      - debconf
+      - dnsutils
+      - ebtables
+      - emacs
+      - ethtool
+      - ftp
+      - g++
+      - gcc
+      - gettext
+      - git
+      - hostapd
+      - ifupdown
+      - irqbalance
+      - jq
+      - less
+      - libncurses5-dev
+      - libreadline-dev
+      - libssl-dev
+      - libtool
+      - libusb-dev
+      - lm-sensors
+      - lynx
+      - nano
+      - ncurses-base
+      - ncurses-bin
+      - ncurses-dev
+      - ntp
+      - openbsd-inetd
+      - openssl
+      - patch
+      - patchutils
+      - psmisc
+      - python
+      - readline-common
+      - ruby
+      - samba-client
+      - samba-common
+      - screen
+      - snmp
+      - snmpd
+      - subversion
+      - sudo
+      - tcpdump
+      - tcsh
+      - telnet
+      - tftp
+      - traceroute
+      - usb-modeswitch
+      - whois
+      - wireless-tools
+      - zlib1g-dev
+      - bridge-utils
+      - syslog-ng-core
+      - aptitude
+      - sysstat
+      - dstat
+      - apt-transport-https
+      - net-tools
+      - flex
+      - bison
+    update_cache: false
+  when: ansible_distribution_release == 'focal'
   async: 3600
   poll: 1
 

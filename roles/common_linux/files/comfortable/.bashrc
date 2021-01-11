@@ -15,6 +15,7 @@ export HISTSIZE=100000
 export HISTFILESIZE=100000
 export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
+export DEBIAN_FRONTEND=noninteractive
 
 if [ -f ~/.bashrc_addtional ]; then
     . ~/.bashrc_addtional

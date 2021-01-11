@@ -14,33 +14,7 @@
   shell:
     cmd: |
       set -eu
-      # Determine architecture
-      architecture=$(dpkg --print-architecture)
-      case $architecture in
-        armel)   architecture="arm" ;;
-        amd64)   architecture="x64" ;;
-      esac
-
-      package_name=dotnet-sdk-5.0.101-linux-$architecture.tar.gz
-
-      # Download
-      mkdir -p /tmp/install_dotnet_tmp/
-      cd /tmp/install_dotnet_tmp/
-      rm -f $package_name
-      wget --no-check-certificate --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" https://static.lts.dn.ipantt.net/d/210111_002_microsoft_dotnet_sdk_12255/$package_name
-
-      mkdir -p /usr/share/dotnet/
-      tar zxf $package_name -C /usr/share/dotnet/
-      ln -s -f /usr/share/dotnet/dotnet /usr/bin/dotnet
-      /usr/bin/dotnet tool uninstall -g dotnet-dump || true
-      /usr/bin/dotnet tool install -g dotnet-dump || true
-
-      if [ ! -e /etc/profile.d/dotnet-cli-tools-bin-path.sh ]; then
-      cat <<\EOF_SH > /etc/profile.d/dotnet-cli-tools-bin-path.sh
-      export PATH="$PATH:$HOME/.dotnet/tools"
-      EOF_SH
-      fi
-
+      bash -x <(curl -4 --insecure --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" --raw --silent https://static.lts.dn.ipantt.net/d/210111_002_microsoft_dotnet_sdk_12255/210111_ubuntu_install_dotnet_5.0.101.sh)
       touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
     executable: /bin/bash
   vars:
