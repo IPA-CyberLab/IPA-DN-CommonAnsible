@@ -11,7 +11,7 @@ do
  if [ $interval -gt $maxinterval ]; then
    interval=$maxinterval
  fi
- ntpdate -uq $ntp_servers
+ ntpdate -u $ntp_servers
  if [ $? -eq 0 ]; then
    systemctl stop ntp-systemd-netif.service || true
    systemctl stop ntp.service || true
