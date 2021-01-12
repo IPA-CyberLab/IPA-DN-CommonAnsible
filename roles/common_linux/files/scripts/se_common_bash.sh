@@ -50,6 +50,10 @@ function fff() {
   command find $2 -iname "*$1*" $3 $4 $5 $6 $7 $8 $9 | xargs -n 1 -r -P 1 -IXXX ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S" -lapd1h XXX
 }
 
+function tt() {
+  command find $3 -type f -print -iname "*$2*" | xargs grep -F -i -n $1
+}
+
 # same to .bashrc
 alias ls='ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S"'
 alias emacs='emacs -nw'
