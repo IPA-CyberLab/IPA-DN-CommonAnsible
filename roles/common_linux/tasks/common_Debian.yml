@@ -460,6 +460,7 @@
     - { src: '.emacs', dest: '/root/.emacs' }
     - { src: '.screenrc', dest: '/root/.screenrc' }
     - { src: 'ixgbe-options.conf', dest: '/etc/modprobe.d/ixgbe-options.conf' }
+    - { src: 'vmware-tools-tools.conf', dest: '/etc/vmware-tools/tools.conf' }
 
 - name: Configure syslog-ng.conf 1
   lineinfile:
