@@ -16,11 +16,16 @@ alias cpus='mpstat -P ALL 1'
 alias loads='dstat --nocolor --float --bits -tclmnd --socket'
 alias socks='watch -n 1 cat /proc/net/sockstat'
 alias netst='netstat -Wap -46'
+alias netstn='netstat -Wap -46 -n'
+alias listen='netst -n | grep -F -i -e LISTEN -e "0.0.0.0" -e ":::" | grep -F -i -e tcp -e ud'
 alias ios='iostat -dmxt 1'
 alias fpath='readlink -f'
 alias proc='ps ww -H -eo pid,lstart,wchan,time,vsize,rssize,stat,tname,euser,pcpu,pid,thcount,cmd'
 alias thread='ps ww -m -eo pid,lstart,wchan,time,vsize,rssize,stat,tname,euser,pcpu,thcount,lwp,cmd'
 alias lxclist='lxc list -c nsN46lc,boot.autostart:boot,volatile.last_state.power:last'
+alias readlog='journalctl -xe -n 10000'
+alias readlogall='journalctl -xe -n all'
+alias readlogf='journalctl -f'
 
 function lxcsetboot()
 {
@@ -47,6 +52,10 @@ function ff() {
 
 function fff() {
   command find $2 -iname "*$1*" $3 $4 $5 $6 $7 $8 $9 | xargs -n 1 -r -P 1 -IXXX ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S" -lapd1h XXX
+}
+
+function tt() {
+  command find $3 -type f -print -iname "*$2*" | xargs grep -F -i -n $1
 }
 
 # same to .bashrc

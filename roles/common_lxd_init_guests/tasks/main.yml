@@ -40,16 +40,36 @@
     - python2_2.7.17-1_arm64.deb
     - python2-minimal_2.7.17-1_arm64.deb
     - python-minimal_2.7.17-1_arm64.deb
+    - libpython2-stdlib_2.7.17-2ubuntu4_arm64.deb # For Ubuntu 20.04 ARM64  -- skip - ifupdown_0.8.35ubuntu1_arm64.deb since it is same to existing one
+    - libpython2.7-minimal_2.7.18-1~20.04_arm64.deb
+    - libpython2.7-stdlib_2.7.18-1~20.04_arm64.deb
+    - python-is-python2_2.7.17-4_all.deb
+    - python2-minimal_2.7.17-2ubuntu4_arm64.deb
+    - python2.7-minimal_2.7.18-1~20.04_arm64.deb
+    - python2.7_2.7.18-1~20.04_arm64.deb
+    - python2_2.7.17-2ubuntu4_arm64.deb
+    - ifupdown_0.8.35ubuntu1_amd64.deb # For Ubuntu 20.04 AMD64  skip - python-is-python2_2.7.17-4_all.deb since it is same to existing one
+    - libpython2-stdlib_2.7.17-2ubuntu4_amd64.deb
+    - libpython2.7-minimal_2.7.18-1~20.04_amd64.deb
+    - libpython2.7-stdlib_2.7.18-1~20.04_amd64.deb
+    - python2-minimal_2.7.17-2ubuntu4_amd64.deb
+    - python2.7-minimal_2.7.18-1~20.04_amd64.deb
+    - python2.7_2.7.18-1~20.04_amd64.deb
+    - python2_2.7.17-2ubuntu4_amd64.deb
   vars:
-    ansible_flag_check_filename: "lxd_related_files_9" # increment the number when adds files
+    ansible_flag_check_filename: "lxd_related_files_10" # increment the number when adds files
   when:
     ((ansible_flags | json_query("files[?path=='/etc/ansible_flags/" + ansible_flag_check_filename + "'].path") | length()) == 0)
 
+# 18.04 or 19.10
 # 注: ↑  apt-get -y update && apt-get -y install ifupdown libpython2.7-minimal libpython2.7-stdlib libpython-stdlib python python2.7 python2.7-minimal python-minimal の結果で収集
+# 
+# 20.04
+# 注: ↑  apt-get -y update && apt-get -y install ifupdown libpython2.7-minimal libpython2.7-stdlib libpython2-stdlib python-is-python2 python2 python2-minimal python2.7 python2.7-minimal の結果で収集
 
 - name: touch flags for LXD-related files
   shell: |
-    touch /etc/ansible_flags/lxd_related_files_9 # increment the number when adds files
+    touch /etc/ansible_flags/lxd_related_files_10 # increment the number when adds files
   changed_when: false
 
 - name: configure guest loop
