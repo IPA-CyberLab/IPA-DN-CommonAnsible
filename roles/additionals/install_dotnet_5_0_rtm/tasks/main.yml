@@ -14,7 +14,7 @@
   shell:
     cmd: |
       set -eu
-      bash -x <(curl -4 --insecure --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" --raw --silent https://static.lts.dn.ipantt.net/d/210111_002_microsoft_dotnet_sdk_12255/210111_ubuntu_install_dotnet_5.0.101.sh)
+      bash -x <(curl -4 --insecure --pinnedpubkey "sha256//lvnOVgA0u06WySztudkn+urQda/zFBRd65A5wCmcBpQ=" --raw --silent https://static.lts.dn.ipantt.net/d/210111_002_microsoft_dotnet_sdk_12255/210209_ubuntu_install_dotnet_5.0.103.sh)
       touch "/etc/ansible_flags/{{ ansible_flag_check_filename }}"
     executable: /bin/bash
   vars:
