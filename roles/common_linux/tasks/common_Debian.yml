@@ -448,6 +448,14 @@
     state: absent
     backup: true
 
+- name: create /etc/vmware-tools/
+  file:
+    path: /etc/vmware-tools/
+    state: directory
+    owner: root
+    mode: 0755
+  changed_when: false
+
 - name: install files for comfortable
   copy:
     src: "files/comfortable/{{ item.src }}"
