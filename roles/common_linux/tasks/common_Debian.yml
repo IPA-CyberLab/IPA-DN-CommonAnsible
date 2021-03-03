@@ -448,6 +448,14 @@
     state: absent
     backup: true
 
+- name: create /etc/vmware-tools/
+  file:
+    path: /etc/vmware-tools/
+    state: directory
+    owner: root
+    mode: 0755
+  changed_when: false
+
 - name: install files for comfortable
   copy:
     src: "files/comfortable/{{ item.src }}"
@@ -666,6 +674,9 @@
     # IPv6 disable
     - { target: 'net.ipv6.conf.all.disable_ipv6', new: '{{ "1" if (disable_ipv6_all | default()) else "0" }}' }
     - { target: 'net.ipv6.conf.default.disable_ipv6', new: '{{ "1" if (disable_ipv6_all | default()) else "0" }}' }
+    # IPv6 Disable Random Address
+    - { target: 'net.ipv6.conf.all.use_tempaddr', new: '0' }
+    - { target: 'net.ipv6.conf.default.use_tempaddr', new: '0' }
 
 - name: apply sysctl.ctl to system
   shell: sysctl -p || true

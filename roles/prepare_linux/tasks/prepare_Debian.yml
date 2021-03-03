@@ -10,24 +10,46 @@
     name: apt-daily.timer
     state: stopped
     enabled: false
+    masked: yes
 
 - name: Disable apt-daily.service
   systemd:
     name: apt-daily.service
     state: stopped
     enabled: false
+    masked: yes
 
 - name: Disable apt-daily-upgrade.timer
   systemd:
     name: apt-daily-upgrade.timer
     state: stopped
     enabled: false
+    masked: yes
 
 - name: Disable apt-daily-upgrade.service
   systemd:
     name: apt-daily-upgrade.service
     state: stopped
     enabled: false
+    masked: yes
+
+- name: Disable systemd-network-generator.service
+  systemd:
+    name: systemd-network-generator.service
+    enabled: false
+    masked: yes
+
+- name: Disable systemd-networkd-wait-online.service
+  systemd:
+    name: systemd-networkd-wait-online.service
+    enabled: false
+    masked: yes
+
+- name: Disable systemd-networkd.service
+  systemd:
+    name: systemd-networkd.service
+    enabled: false
+    masked: yes
 
 - name: update apt sources.list
   shell:
