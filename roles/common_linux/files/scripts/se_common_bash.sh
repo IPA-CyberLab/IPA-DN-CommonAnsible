@@ -27,6 +27,29 @@ alias readlog='journalctl -xe -n 10000'
 alias readlogall='journalctl -xe -n all'
 alias readlogf='journalctl -f'
 
+# same to .bashrc
+alias ls='ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S"'
+alias emacs='emacs -nw'
+export PS1='[\u@\h \w]\$ '
+export EDITOR='emacs -nw'
+export LANG=en_US.UTF-8
+export TMOUT=268435456
+export HISTSIZE=100000
+export HISTFILESIZE=100000
+export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+export DEBIAN_FRONTEND=noninteractive
+
+
+
+
+### custom functions for bash only
+
+IS_BASH=`ps -o args= -p "$$" | awk '{print $1;}' | grep bash | wc -l`
+if [ $IS_BASH -eq 0 ]; then
+  exit 0
+fi;
+
 function lxcsetboot()
 {
   command lxc config set $1 boot.autostart true
@@ -58,15 +81,4 @@ function tt() {
   command find $3 -type f -print -iname "*$2*" | xargs grep -F -i -n $1
 }
 
-# same to .bashrc
-alias ls='ls --color=auto --time-style="+%Y/%m/%d %H:%M:%S"'
-alias emacs='emacs -nw'
-export PS1='[\u@\h \w]\$ '
-export EDITOR='emacs -nw'
-export LANG=en_US.UTF-8
-export TMOUT=268435456
-export HISTSIZE=100000
-export HISTFILESIZE=100000
-export HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
-export DOTNET_CLI_TELEMETRY_OPTOUT=1
-export DEBIAN_FRONTEND=noninteractive
+
