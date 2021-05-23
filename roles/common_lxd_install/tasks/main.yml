@@ -115,6 +115,7 @@
       passdb backend = tdbsam
       load printers = no
       socket options = TCP_NODELAY
+      client min protocol = NT1
       [vmdata1]
       comment = vmdata1
       path = /vmdata1/
