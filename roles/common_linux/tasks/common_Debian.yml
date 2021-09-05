@@ -749,6 +749,7 @@
     - { src: 'files/scripts/se_check_nfs_health_killall_if_fail.sh', dest: '/etc/se_check_nfs_health_killall_if_fail.sh' }
     - { src: 'files/scripts/se_ntpdate_start.sh', dest: '/etc/se_ntpdate_start.sh' }
     - { src: 'files/scripts/se_ntpdate_loop.sh', dest: '/etc/se_ntpdate_loop.sh' }
+    - { src: 'files/scripts/se_lxd_delete_snap_cache.sh', dest: '/etc/se_lxd_delete_snap_cache.sh' }
     - { src: 'files/settings/sysstat.txt', dest: '/etc/default/sysstat' }
 
 - name: upload se_boot_network_boottime1.sh

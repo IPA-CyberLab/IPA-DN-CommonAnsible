@@ -94,6 +94,17 @@
     job: /etc/se_restart_lxd.sh
     backup: yes
 
+- name: add se_lxd_delete_snap_cache.sh cron
+  cron:
+    name: "se_lxd_delete_snap_cache"
+    minute: 15
+    hour: 4
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: /etc/se_lxd_delete_snap_cache.sh
+    backup: yes
+
 - name: install samba server
   apt:
     pkg:
