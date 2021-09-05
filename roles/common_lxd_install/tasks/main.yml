@@ -83,6 +83,7 @@
   changed_when: false
   when: ansible_distribution_release == 'bionic'
 
+# 注意: cron 利用時 次からは /etc/crontab に書くようにする！ cron_file を省略すると root ユーザーの crontab に書かれます https://docs.ansible.com/ansible/2.4/cron_module.html
 - name: add restart lxd to cron
   cron:
     name: "restart lxd midnight"
@@ -94,6 +95,7 @@
     job: /etc/se_restart_lxd.sh
     backup: yes
 
+# 注意: cron 利用時 次からは /etc/crontab に書くようにする！ cron_file を省略すると root ユーザーの crontab に書かれます https://docs.ansible.com/ansible/2.4/cron_module.html
 - name: add se_lxd_delete_snap_cache.sh cron
   cron:
     name: "se_lxd_delete_snap_cache"
