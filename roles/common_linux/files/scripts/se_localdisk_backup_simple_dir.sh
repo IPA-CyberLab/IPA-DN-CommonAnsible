@@ -4,8 +4,6 @@
 
 set -eu
 
-apt-get -y install nfs-common || true
-
 logfile="/root/se_backup_localdisk.log"
 
 if [ $# -ne 5 ]; then
