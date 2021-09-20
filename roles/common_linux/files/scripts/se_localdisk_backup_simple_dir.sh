@@ -8,7 +8,7 @@ apt-get -y install nfs-common || true
 
 logfile="/root/se_backup_localdisk.log"
 
-if [ $# -ne 6 ]; then
+if [ $# -ne 5 ]; then
  echo Usage: se_localdisk_backup_simple_dir.sh localdisk_subdir localdisk_mountpoint backup_target_dir encryption_key max_history_count
  exit 1
 fi

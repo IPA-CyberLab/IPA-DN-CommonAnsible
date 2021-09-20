@@ -4,7 +4,7 @@
 
 set -eu
 
-if [ $# -ne 5 ]; then
+if [ $# -ne 6 ]; then
  echo Usage: se_localdisk_backup_lxd_containers_safe.sh backup_subject_type localdisk_subdir localdisk_mountpoint vmdata_root_dir encryption_key max_history_count
  exit 1
 fi
