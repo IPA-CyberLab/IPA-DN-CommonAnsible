@@ -9,7 +9,7 @@ apt-get -y install nfs-common || true
 logfile="/root/se_backup.log"
 
 if [ $# -ne 6 ]; then
- echo Usage: nfs_address nfs_subdir local_mount_point backup_target_dir encryption_key max_history_count
+ echo Usage: se_backup_simple_dir.sh nfs_address nfs_subdir local_mount_point backup_target_dir encryption_key max_history_count
  exit 1
 fi
 

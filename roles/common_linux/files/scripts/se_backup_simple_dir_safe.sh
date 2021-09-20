@@ -5,7 +5,7 @@
 set -eu
 
 if [ $# -ne 5 ]; then
- echo Usage: nfs_address backup_subject_type backup_target_dir encryption_key max_history_count
+ echo Usage: se_backup_simple_dir_safe.sh nfs_address backup_subject_type backup_target_dir encryption_key max_history_count
  exit 1
 fi
 
